@@ -1,8 +1,6 @@
 # PipefyMessage
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/pipefy_message`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This project it's a gem who provides a simple way to produce and consume messages for async processing.
 
 ## Installation
 
@@ -22,14 +20,24 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Development
 
-## Development
+To test changes without install this dependency on your application, on the project root execute:
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+    $ bundle install
+    $ gem build pipefy_message.gemspec
+    $ gem install pipefy_message-0.1.0.gem
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+After that, we are going to test the gem with these commands:
+
+    $ irb
+
+On the irb console:
+
+    $ require 'pipefy_message'
+    $ message = PipefyMessage::Test.new
+    $ message.hello
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/pipefy_message.
+Bug reports and pull requests are welcome on GitHub at https://github.com/pipefy/pipefy_message.
