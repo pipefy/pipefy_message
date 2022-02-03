@@ -1,0 +1,42 @@
+name: notify
+
+on:
+  workflow_run:
+    workflows: [release]
+    branches: [main]
+    types: [completed]
+
+env:
+  SLACK_HOOK_URL: https://hooks.slack.com/services/****/*****
+
+jobs:
+  fetch-last-tag:
+    name: Fetch Last Tag
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Fetch Last Tag
+        run: |
+          git tag -l | xargs git tag -d
+          git fetch --tags
+          TAG=$(git describe --tags --always $(git rev-list --tags --max-count=1))
+          echo "TAG=$TAG" >> $GITHUB_ENV
+    outputs:
+      TAG: ${{ env.TAG }}
+
+  notify-slack:
+    name: Notify Slack
+    needs: [fetch-last-tag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2.2.0
+        env:
+          SLACK_WEBHOOK: ${{ env.SLACK_HOOK_URL }}
+          SLACK_TITLE: '[Platform Team] - ${{github.repository}}'
+          SLACK_MESSAGE: 'New gem version released'
+          SLACK_ICON_EMOJI: ':github:'
+          SLACK_USERNAME: ${{github.repository}}
+          SLACK_FOOTER: 'Tag: ${{ needs.fetch-last-tag.outputs.TAG }}'
