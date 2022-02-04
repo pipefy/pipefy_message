@@ -3,7 +3,7 @@ name: release
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Chekout repo
+      - name: Checkout repo
         uses: actions/checkout@v2
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.6'
+          ruby-version: '2.6.6'
           bundler-cache: true
 
       - name: Cache dependecies
@@ -40,13 +40,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Chekout repo
+      - name: Checkout repo
         uses: actions/checkout@v2
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.6'
+          ruby-version: '2.6.6'
           bundler-cache: true
 
       - name: Cache dependecies
