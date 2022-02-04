@@ -48,3 +48,5 @@ On the irb console:
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/pipefy/pipefy_message.
+
+> Follow the [template](https://github.com/pipefy/pipefy_message/blob/main/.github/pull_request_template.md) while opening a PR
