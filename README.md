@@ -2,6 +2,13 @@
 
 This project it's a gem who provides a simple way to produce and consume messages for async processing.
 
+## Requirements
+
+This project requires the following to run:
+
+- Ruby 2.6.6
+- [Bundler](https://bundler.io/)
+
 ## Installation
 
 Add this line to your application's Gemfile:
