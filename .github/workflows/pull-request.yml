@@ -19,8 +19,19 @@ jobs:
           ruby-version: '2.6'
           bundler-cache: true
 
+      - name: Cache dependecies
+        uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Install dependencies
+        run: bundle install
+
       - name: Run Rubocop
-        run: rubocop
+        run: bundle exec rubocop
 
   build:
     name: Build App
