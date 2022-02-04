@@ -7,7 +7,7 @@ on:
     types: [completed]
 
 env:
-  SLACK_HOOK_URL: https://hooks.slack.com/services/****/*****
+  SLACK_HOOK_URL: https://hooks.slack.com/services/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
 
 jobs:
   fetch-last-tag:
