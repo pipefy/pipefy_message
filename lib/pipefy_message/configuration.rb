@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 require "aws-sdk-sns"
+require "singleton"
 
 module PipefyMessage
   # Aws Provider Config class to connect with the cloud resources
   class AwsProviderConfig
-    def self.do_connection
+    include Singleton
+
+    def do_connection
       Aws.config.update(
         endpoint: ENV["AWS_ENDPOINT"],
         access_key_id: ENV["AWS_ACCESS_KEY_ID"],
@@ -14,6 +17,4 @@ module PipefyMessage
       )
     end
   end
-
 end
-
