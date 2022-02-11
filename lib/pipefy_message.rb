@@ -9,8 +9,6 @@ module PipefyMessage
   # Simple Test class to validate the project
   class Test
     def hello
-
-
       publisher = SnsPublisher.new
 
       payload = { foo: "bar" }

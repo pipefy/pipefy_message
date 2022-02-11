@@ -6,15 +6,13 @@ require "json"
 module PipefyMessage
   # Aws SNS Publisher class to publish json messages into a specific topic
   class SnsPublisher
-
     def initialize
-      awsConfig = PipefyMessage::AwsProviderConfig.instance
-      awsConfig.setup_connection
+      aws_config = PipefyMessage::AwsProviderConfig.instance
+      aws_config.setup_connection
       @sns = Aws::SNS::Resource.new
     end
 
     def publish(payload, topic_arn)
-
       message = prepare_payload(payload)
       do_publish(message, topic_arn)
     end
@@ -35,11 +33,8 @@ module PipefyMessage
       topic.publish({
                       message: message.to_json,
                       message_structure: "json"
-                    }
-      )
+                    })
       puts "Message Published with ID #{result.message_id}"
     end
-
   end
 end
-
