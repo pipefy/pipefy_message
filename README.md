@@ -32,6 +32,11 @@ Or install it yourself as:
 To test changes without install this dependency on your application, on the project root execute:
 
     $ make build-app
+    $ make build-app-infra
+
+If you need to recreate the infra (SNS and SQS) run:
+
+    $ make recreate-app-infra
 
 After that, we are going to test the gem with these commands:
 
