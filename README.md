@@ -31,9 +31,7 @@ Or install it yourself as:
 
 To test changes without install this dependency on your application, on the project root execute:
 
-    $ bundle install
-    $ gem build pipefy_message.gemspec
-    $ gem install pipefy_message-0.1.0.gem
+    $ make build-app
 
 After that, we are going to test the gem with these commands:
 
@@ -45,8 +43,23 @@ On the irb console:
     $ message = PipefyMessage::Test.new
     $ message.hello
 
+## Project Stack
+
+- [Aws SDK Ruby - SNS & SQS](https://github.com/aws/aws-sdk-ruby)
+- [Bundler](https://bundler.io/)
+- Docker-compose
+- [GitHub Actions](https://docs.github.com/en/actions)
+- Makefile
+- Ruby 2.6.6
+- [Rubocop](https://github.com/rubocop/rubocop)
+
+## Brokers Documentation
+
+* [SNS & SQS User guide](https://github.com/pipefy/pipefy_message/tree/main/lib/pipefy_message/broker/aws/README.md)
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/pipefy/pipefy_message.
 
 > Follow the [template](https://github.com/pipefy/pipefy_message/blob/main/.github/pull_request_template.md) while opening a PR
+

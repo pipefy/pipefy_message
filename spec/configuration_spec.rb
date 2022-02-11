@@ -3,7 +3,7 @@
 RSpec.describe PipefyMessage::AwsProviderConfig do
   context "when I try to connect with AWS provider" do
     it "should return a hash with correct values" do
-      keys = PipefyMessage::AwsProviderConfig.instance.do_connection
+      keys = PipefyMessage::AwsProviderConfig.instance.setup_connection
 
       expected = { endpoint: ENV["AWS_ENDPOINT"], access_key_id: ENV["AWS_ACCESS_KEY_ID"],
                    secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"], region: "us-east-1" }

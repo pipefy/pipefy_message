@@ -8,7 +8,7 @@ module PipefyMessage
   class AwsProviderConfig
     include Singleton
 
-    def do_connection
+    def setup_connection
       Aws.config.update(
         endpoint: ENV["AWS_ENDPOINT"],
         access_key_id: ENV["AWS_ACCESS_KEY_ID"],

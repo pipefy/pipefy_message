@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 
 services:
 
@@ -6,11 +6,11 @@ services:
     container_name: localstack
     image: localstack/localstack-light:0.11.5
     environment:
+      AWS_DEFAULT_REGION: us-east-1
       LOCALSTACK_SERVICES: sns,sqs
       DEFAULT_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
     ports:
-      - 4576:4576
+      - 4566:4566
       - 4571:4571
 
   aws-cli:
@@ -34,6 +34,8 @@ services:
 
         # Creating Subscription from SQS to SNS
         aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:us-east-1:000000000000:pipefy-local-topic --protocol sqs --notification-endpoint http://localstack:4566/000000000000/pipefy-local-queue
+
+        aws --endpoint-url=http://localstack:4566 sqs receive-message --queue-url http://localstack:4566/000000000000/pipefy-local-queue
       "
     depends_on:
           - localstack
