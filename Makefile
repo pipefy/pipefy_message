@@ -1,4 +1,3 @@
-
 build-app-infra:
 	@docker-compose up -d
 	@echo "Checking if the localstack SNS and SQS resources are created"
