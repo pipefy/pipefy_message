@@ -7,8 +7,7 @@ module PipefyMessage
   # Aws SNS Publisher class to publish json messages into a specific topic
   class SnsPublisher
     def initialize
-      aws_config = PipefyMessage::AwsProviderConfig.instance
-      aws_config.setup_connection
+      PipefyMessage::AwsProviderConfig.instance.setup_connection
       @sns = Aws::SNS::Resource.new
     end
 
