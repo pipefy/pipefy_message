@@ -1,0 +1,41 @@
+version: '3.5'
+
+services:
+
+  localstack:
+    container_name: localstack
+    image: localstack/localstack-light:0.11.5
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      LOCALSTACK_SERVICES: sns,sqs
+      DEFAULT_REGION: us-east-1
+    ports:
+      - 4566:4566
+      - 4571:4571
+
+  aws-cli:
+    container_name: aws-cli
+    image: amazon/aws-cli:latest
+    environment:
+      AWS_ACCESS_KEY_ID: DEV123
+      AWS_SECRET_ACCESS_KEY: DEV123
+      AWS_DEFAULT_REGION: us-east-1
+    entrypoint: /bin/sh -c
+    command: >
+      "
+        # Wait for localstack boot
+        sleep 10
+
+        # Creating SNS Topics
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name pipefy-local-topic
+
+        # Creating SQS Queues
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pipefy-local-queue
+
+        # Creating Subscription from SQS to SNS
+        aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:us-east-1:000000000000:pipefy-local-topic --protocol sqs --notification-endpoint http://localstack:4566/000000000000/pipefy-local-queue
+
+        aws --endpoint-url=http://localstack:4566 sqs receive-message --queue-url http://localstack:4566/000000000000/pipefy-local-queue
+      "
+    depends_on:
+          - localstack
