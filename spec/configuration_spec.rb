@@ -6,7 +6,7 @@ RSpec.describe PipefyMessage::AwsProviderConfig do
       keys = PipefyMessage::AwsProviderConfig.instance.setup_connection
 
       expected = { endpoint: ENV["AWS_ENDPOINT"], access_key_id: ENV["AWS_ACCESS_KEY_ID"],
-                   secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"], region: "us-east-1" }
+                   secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"], region: "us-east-1", stub_responses: true }
 
       expect(keys).to eq expected
     end

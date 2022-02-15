@@ -12,8 +12,7 @@ module PipefyMessage
       @poller = Aws::SQS::QueuePoller.new(queue_url)
     end
 
-    def receive_message
-
+    def consume_message
       @poller.poll(wait_time_seconds: 10) do |received_message|
         puts "Receiving Message from Broker"
         puts "Message ID:   #{received_message.message_id}"
@@ -21,12 +20,14 @@ module PipefyMessage
 
         process_message(payload["Message"])
 
+      rescue StandardError
+        puts "Failed to process message with ID: #{received_message.message_id}"
+        throw :skip_delete
       end
     end
 
-    def process_message(message)
+    def process_message(_message)
       raise "Must be implemented by a worker class"
     end
   end
 end
-

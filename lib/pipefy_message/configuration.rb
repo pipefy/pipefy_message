@@ -13,7 +13,8 @@ module PipefyMessage
         endpoint: ENV["AWS_ENDPOINT"],
         access_key_id: ENV["AWS_ACCESS_KEY_ID"],
         secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-        region: ENV["AWS_REGION"] || "us-east-1"
+        region: ENV["AWS_REGION"] || "us-east-1",
+        stub_responses: true
       )
     end
   end
