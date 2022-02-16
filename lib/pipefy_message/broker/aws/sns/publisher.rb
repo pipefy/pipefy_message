@@ -29,10 +29,10 @@ module PipefyMessage
       topic = @sns.topic(topic_arn)
 
       puts "Publishing a json message to topic #{topic_arn}"
-      topic.publish({
-                      message: message.to_json,
-                      message_structure: "json"
-                    })
+      result = topic.publish({
+                               message: message.to_json,
+                               message_structure: "json"
+                             })
       puts "Message Published with ID #{result.message_id}"
     end
   end
