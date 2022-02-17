@@ -19,7 +19,7 @@ module PipefyMessage
       puts "Starting the consumer process"
       consumer = BaseConsumer.new("http://localhost:4566/000000000000/pipefy-local-queue")
       puts "Creating new instance of consumer #{consumer}"
-      consumer.receive_message
+      consumer.consume_message
     end
 
     def publish_and_consume

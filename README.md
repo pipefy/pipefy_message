@@ -44,9 +44,26 @@ After that, we are going to test the gem with these commands:
 
 On the irb console:
 
-    $ require 'pipefy_message'
-    $ message = PipefyMessage::Test.new
-    $ message.hello
+* Publish a message
+    ```ruby
+    require 'pipefy_message'
+    message = PipefyMessage::Test.new
+    message.publish
+    ```
+
+* Consume a message
+    ```ruby
+    require 'pipefy_message'
+    message = PipefyMessage::Test.new
+    message.consume
+    ```
+
+* Publish and Consume a message
+    ```ruby
+    require 'pipefy_message'
+    message = PipefyMessage::Test.new
+    message.publish_and_consume
+    ```
 
 ## Project Stack
 
