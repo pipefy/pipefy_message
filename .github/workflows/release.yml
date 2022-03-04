@@ -61,7 +61,7 @@ jobs:
         run: bundle install
 
       - name: Run tests
-        run: bundle exec rspec
+        run: make test
 
   create-tag-and-release:
     name: Create Tag and GitHub Release
