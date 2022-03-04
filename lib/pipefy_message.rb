@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 require_relative "pipefy_message/version"
-require_relative "pipefy_message/configuration"
+require_relative "pipefy_message/broker/aws/configuration"
 require_relative "pipefy_message/broker/aws/sns/publisher"
 require_relative "pipefy_message/base_consumer"
+require_relative "pipefy_message/base_publisher"
 require "pry"
 
 module PipefyMessage
   # Simple Test class to validate the project
   class Test
     def publish
-      publisher = SnsPublisher.new
       payload = { foo: "bar" }
-      puts publisher.publish(payload, "arn:aws:sns:us-east-1:000000000000:pipefy-local-topic")
+      puts Publisher.publish(payload, "arn:aws:sns:us-east-1:000000000000:pipefy-local-topic")
     end
 
     def consume
