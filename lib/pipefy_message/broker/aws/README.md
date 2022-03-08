@@ -55,7 +55,7 @@ aws --endpoint-url=http://localhost:4566 sns subscribe --topic-arn arn:aws:sns:u
 The expected output is:
 ```bash
 {
-  "QueueUrl": "http://localhost:4566/000000000000/pipe-events-queue"
+  "SubscriptionArn": "arn:aws:sns:us-east-1:000000000000:pipe-events-topic:d5a44fe9-267b-4d10-b293-9b7f75f2ca09"
 }
 ```
 Parameters:
