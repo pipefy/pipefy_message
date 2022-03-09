@@ -13,3 +13,11 @@ build-app:
 	bundle install
 	gem build pipefy_message.gemspec
 	gem install pipefy_message-[0-9].[0-9].[0-9].gem
+
+test:
+	bundle exec rspec
+
+run-lint:
+	bundle exec rubocop
+
+

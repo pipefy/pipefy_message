@@ -14,33 +14,47 @@ This project requires the following to run:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'pipefy_message'
+  gem 'pipefy_message'
 ```
 
 And then execute:
 
-    $ bundle install
+```console
+  bundle install
+```
 
 Or install it yourself as:
 
-    $ gem install pipefy_message
+```console
+  gem install pipefy_message
+```
 
 ## Usage
 
 ### Development
 
-To test changes without install this dependency on your application, on the project root execute:
-
-    $ make build-app
-    $ make build-app-infra
+To test changes without install this dependency on your application, on your terminal go to the project root and execute:
+    
+```console
+  export AWS_ACCESS_KEY_ID=foo
+  export AWS_SECRET_ACCESS_KEY=bar
+  export AWS_ENDPOINT="http://localhost:4566"
+  
+  make build-app
+  make build-app-infra
+```
 
 If you need to recreate the infra (SNS and SQS) run:
 
-    $ make recreate-app-infra
+```console
+  make recreate-app-infra
+```
 
 After that, we are going to test the gem with these commands:
 
-    $ irb
+```console
+  irb
+```
 
 On the irb console:
 

@@ -6,6 +6,7 @@ RSpec.describe PipefyMessage::BaseConsumer do
       ENV["AWS_ENDPOINT"] = "http://localhost:4566"
       ENV["AWS_ACCESS_KEY_ID"] = "foo"
       ENV["AWS_SECRET_ACCESS_KEY"] = "bar"
+      ENV["AWS_CLI_STUB_RESPONSE"] = "true"
     end
     it "should consumer a message properly" do
       consumer = PipefyMessage::BaseConsumer.new("http://localhost:4566/000000000000/pipefy-local-queue-test")

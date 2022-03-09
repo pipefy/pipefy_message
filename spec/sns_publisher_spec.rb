@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-RSpec.describe PipefyMessage::SnsPublisher do
+RSpec.describe PipefyMessage::Publisher::AwsProvider::SnsPublisher do
   context "when I try to publish a message with Sns publisher" do
     before(:each) do
       ENV["AWS_ENDPOINT"] = "http://localhost:4566"
       ENV["AWS_ACCESS_KEY_ID"] = "foo"
       ENV["AWS_SECRET_ACCESS_KEY"] = "bar"
 
-      @publisher = PipefyMessage::SnsPublisher.new
+      @publisher = PipefyMessage::Publisher::AwsProvider::SnsPublisher.new
     end
     it "should return a message ID" do
       mocked_return = { message_id: "5482c8be-db2c-44ec-a899-3aa52e424cc3",
