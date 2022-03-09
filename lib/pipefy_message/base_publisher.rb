@@ -10,9 +10,7 @@ module PipefyMessage
     # Base Publisher provided by this gem, to be used for the external publishers to send messages to a broker
     class BasePublisher
       def publish(message, topic)
-        result = publisher_instance.publish(message, topic)
-        puts result
-        result
+        publisher_instance.publish(message, topic)
       end
 
       private

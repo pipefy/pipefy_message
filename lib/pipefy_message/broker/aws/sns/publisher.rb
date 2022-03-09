@@ -2,6 +2,7 @@
 
 require "aws-sdk-sns"
 require "json"
+require "logger"
 require_relative "../configuration"
 
 module PipefyMessage
@@ -13,6 +14,7 @@ module PipefyMessage
           aws_config = PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig.instance
           aws_config.setup_connection
           @sns = Aws::SNS::Resource.new
+          @log = Logger.new($stdout)
         end
 
         def publish(payload, topic_arn)
@@ -32,13 +34,13 @@ module PipefyMessage
         def do_publish(message, topic_arn)
           topic = @sns.topic(topic_arn)
 
-          puts "Publishing a json message to topic #{topic_arn}"
+          @log.info("Publishing a json message to topic #{topic_arn}")
           result = topic.publish({
                                    message: message.to_json,
                                    message_structure: "json"
                                  })
-          puts result
-          puts "Message Published with ID #{result.message_id}"
+          @log.info("Message Published with ID #{result.message_id}")
+          result
         end
       end
     end

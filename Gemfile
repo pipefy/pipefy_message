@@ -8,6 +8,7 @@ gemspec
 gem "activesupport", "~> 5.0", ">= 5.0.0.1"
 gem "aws-sdk-sns", "~> 1.50.0"
 gem "aws-sdk-sqs", "~> 1.49.0"
+gem "logger"
 gem "rake", "~> 13.0"
 
 group :development, :test do
