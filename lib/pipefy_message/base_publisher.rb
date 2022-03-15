@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "aws-sdk-sqs"
-require "aws-sdk-sns"
 require "active_support"
 require "active_support/core_ext/string/inflections"
 require_relative "broker/aws/sns/publisher"

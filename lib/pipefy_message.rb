@@ -11,7 +11,9 @@ require "logger"
 module PipefyMessage
   # Simple Test class to validate the project
   class Test
-    @log = Logger.new($stdout)
+    def initialize
+      @log = Logger.new($stdout)
+    end
 
     def publish
       payload = { foo: "bar" }
