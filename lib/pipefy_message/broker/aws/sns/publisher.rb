@@ -41,6 +41,8 @@ module PipefyMessage
                                  })
           @log.info("Message Published with ID #{result.message_id}")
           result
+        rescue StandardError
+          @log.error("Failed to publish message [#{message}]")
         end
       end
     end
