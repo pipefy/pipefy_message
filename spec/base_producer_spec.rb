@@ -6,6 +6,7 @@ RSpec.describe PipefyMessage::Publisher::BasePublisher do
       ENV["AWS_ENDPOINT"] = "http://localhost:4566"
       ENV["AWS_ACCESS_KEY_ID"] = "foo"
       ENV["AWS_SECRET_ACCESS_KEY"] = "bar"
+      ENV["ENABLE_AWS_CLIENT_CONFIG"] = "true"
     end
     it "should publish a message properly" do
       mocked_publisher_impl = PipefyMessage::Publisher::AwsProvider::SnsPublisher.new

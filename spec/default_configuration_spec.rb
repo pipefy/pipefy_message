@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig do
+  before do
+    ENV["ENABLE_AWS_CLIENT_CONFIG"] = "false"
+  end
   context "when I try to connect with AWS provider" do
-    it "should return a hash with correct values" do
+    it "should return a custom client config with correct values" do
       keys = PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig.instance.setup_connection
 
       expected = { endpoint: ENV["AWS_ENDPOINT"], access_key_id: ENV["AWS_ACCESS_KEY_ID"],

@@ -11,13 +11,27 @@ module PipefyMessage
         include Singleton
 
         def setup_connection
-          Aws.config.update(
-            endpoint: ENV["AWS_ENDPOINT"],
-            access_key_id: ENV["AWS_ACCESS_KEY_ID"],
-            secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-            region: ENV["AWS_REGION"] || "us-east-1",
-            stub_responses: ENV["AWS_CLI_STUB_RESPONSE"] || false
-          )
+          Aws.config.update(retrieve_config)
+        end
+
+        private
+
+        def aws_client_config?
+          ENV["ENABLE_AWS_CLIENT_CONFIG"] == "true"
+        end
+
+        def retrieve_config
+          config = { region: ENV["AWS_REGION"] || "us-east-1" }
+          merge_custom_config(config)
+        end
+
+        def merge_custom_config(config)
+          if aws_client_config?
+            { access_key_id: ENV["AWS_ACCESS_KEY_ID"], secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
+              endpoint: ENV["AWS_ENDPOINT"], stub_responses: ENV["AWS_CLI_STUB_RESPONSE"] || false }.merge(config)
+          else
+            config
+          end
         end
       end
     end
