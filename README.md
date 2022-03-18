@@ -39,6 +39,7 @@ To test changes without install this dependency on your application, on your ter
   export AWS_ACCESS_KEY_ID=foo
   export AWS_SECRET_ACCESS_KEY=bar
   export AWS_ENDPOINT="http://localhost:4566"
+  export ENABLE_AWS_CLIENT_CONFIG=true
   
   make build-app
   make build-app-infra

@@ -17,7 +17,7 @@ module PipefyMessage
 
     def publish
       payload = { foo: "bar" }
-      puts Publisher::BasePublisher.new.publish(payload, "arn:aws:sns:us-east-1:000000000000:pipefy-local-topic")
+      puts Publisher::BasePublisher.new.publish(payload, "pipefy-local-topic")
     end
 
     def consume

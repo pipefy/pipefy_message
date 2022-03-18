@@ -6,6 +6,7 @@ RSpec.describe PipefyMessage::Publisher::AwsProvider::SnsPublisher do
       ENV["AWS_ENDPOINT"] = "http://localhost:4566"
       ENV["AWS_ACCESS_KEY_ID"] = "foo"
       ENV["AWS_SECRET_ACCESS_KEY"] = "bar"
+      ENV["ENABLE_AWS_CLIENT_CONFIG"] = "true"
 
       @publisher = PipefyMessage::Publisher::AwsProvider::SnsPublisher.new
     end
@@ -16,7 +17,7 @@ RSpec.describe PipefyMessage::Publisher::AwsProvider::SnsPublisher do
       allow(@publisher).to receive(:do_publish).and_return(mocked_return)
 
       payload = { foo: "bar" }
-      result = @publisher.publish(payload, "arn:aws:sns:us-east-1:000000000000:pipefy-local-topic")
+      result = @publisher.publish(payload, "pipefy-local-topic")
       expect(result).to eq mocked_return
     end
     it "should prepare the payload" do
