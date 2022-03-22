@@ -28,14 +28,15 @@ services:
 
         # Creating SNS Topics
         aws --endpoint-url=http://localstack:4566 sns create-topic --name pipefy-local-topic
+        aws --endpoint-url=http://localstack:4566 sns create-topic --name core-analytics-topic
 
         # Creating SQS Queues
         aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name pipefy-local-queue
+        aws --endpoint-url=http://localstack:4566 sqs create-queue --queue-name core-analytics-queue
 
         # Creating Subscription from SQS to SNS
         aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:us-east-1:000000000000:pipefy-local-topic --protocol sqs --notification-endpoint http://localstack:4566/000000000000/pipefy-local-queue
-
-        aws --endpoint-url=http://localstack:4566 sqs receive-message --queue-url http://localstack:4566/000000000000/pipefy-local-queue
+        aws --endpoint-url=http://localstack:4566 sns subscribe --topic-arn arn:aws:sns:us-east-1:000000000000:core-analytics-topic --protocol sqs --notification-endpoint http://localstack:4566/000000000000/core-analytics-queue
       "
     depends_on:
           - localstack
