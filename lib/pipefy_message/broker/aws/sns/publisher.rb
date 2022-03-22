@@ -38,9 +38,9 @@ module PipefyMessage
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          @log.info("Publishing a json message to topic #{topic_arn} [prod_env = #{@is_staging}]")
-          result = topic.publish({ message: message.to_json, message_structure: "json" })
-          @log.info("Message Published with ID #{result.message_id}")
+          @log.info("Publishing a json message to topic #{topic_arn}")
+          result = topic.publish({ message: message.to_json, message_structure: " json " })
+          @log.info(" Message Published with ID #{result.message_id}")
           result
         rescue StandardError
           @log.error("Failed to publish message [#{message}]")
