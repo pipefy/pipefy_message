@@ -17,6 +17,7 @@ module PipefyMessage
           @log = Logger.new($stdout)
           default_arn_prefix = "arn:aws:sns:us-east-1:000000000000:"
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || default_arn_prefix
+          @is_staging = ENV["RAILS_ENV"] == "staging"
         end
 
         def publish(payload, topic_name)
@@ -34,10 +35,10 @@ module PipefyMessage
         end
 
         def do_publish(message, topic_name)
-          topic_arn = @topic_arn_prefix + topic_name
+          topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          @log.info("Publishing a json message to topic #{topic_arn}")
+          @log.info("Publishing a json message to topic #{topic_arn} [prod_env = #{@is_staging}]")
           result = topic.publish({ message: message.to_json, message_structure: "json" })
           @log.info("Message Published with ID #{result.message_id}")
           result
