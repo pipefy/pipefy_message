@@ -42,8 +42,8 @@ module PipefyMessage
           result = topic.publish({ message: message.to_json, message_structure: " json " })
           @log.info(" Message Published with ID #{result.message_id}")
           result
-        rescue StandardError
-          @log.error("Failed to publish message [#{message}]")
+        rescue StandardError => e
+          @log.error("Failed to publish message [#{message}], error details: [#{e.inspect}]")
         end
       end
     end
