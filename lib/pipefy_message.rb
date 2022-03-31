@@ -5,13 +5,14 @@ require_relative "pipefy_message/broker/aws/configuration"
 require_relative "pipefy_message/broker/aws/sns/publisher"
 require_relative "pipefy_message/base_consumer"
 require_relative "pipefy_message/base_publisher"
+require_relative "pipefy_message/logger"
 require "logger"
 
 module PipefyMessage
   # Simple Test class to validate the project
   class Test
     def initialize
-      @log = Logger.new($stdout)
+      @log = PipefyMessage::CustomLogger.new.retrieve_logger
     end
 
     def publish

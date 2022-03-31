@@ -14,10 +14,10 @@ module PipefyMessage
           aws_config = PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig.instance
           aws_config.setup_connection
           @sns = Aws::SNS::Resource.new
-          @log = Logger.new($stdout)
+          @log = PipefyMessage::CustomLogger.new.retrieve_logger
           default_arn_prefix = "arn:aws:sns:us-east-1:000000000000:"
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || default_arn_prefix
-          @is_staging = ENV["RAILS_ENV"] == "staging"
+          @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         end
 
         def publish(payload, topic_name)
