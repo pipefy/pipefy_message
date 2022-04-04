@@ -12,7 +12,7 @@ module PipefyMessage
   # Simple Test class to validate the project
   class Test
     def initialize
-      @log = PipefyMessage::CustomLogger.new.retrieve_logger
+      @log = PipefyMessage::CustomLogger.new
     end
 
     def publish
