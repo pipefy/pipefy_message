@@ -13,7 +13,7 @@ module PipefyMessage
           PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig.instance.setup_connection
           @poller = Aws::SQS::QueuePoller.new(queue_url)
           @wait_time_seconds = ENV["AWS_SQS_CONSUME_WAIT_TIME_SEC"] || 10
-          @log = Logger.new($stdout)
+          @log = PipefyMessage::CustomLogger.new.retrieve_logger
         end
 
         def consume_message
