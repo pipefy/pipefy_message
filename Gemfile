@@ -16,4 +16,5 @@ group :development, :test do
   gem "pry-doc"
   gem "rspec", "~> 3.0"
   gem "rubocop", "~> 1.21"
+  gem "solargraph"
 end
