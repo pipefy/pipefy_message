@@ -6,6 +6,7 @@ require_relative "pipefy_message/broker/aws/sns/publisher"
 require_relative "pipefy_message/base_consumer"
 require_relative "pipefy_message/base_publisher"
 require_relative "pipefy_message/logger"
+require_relative "pipefy_message/worker"
 require "logger"
 
 module PipefyMessage
