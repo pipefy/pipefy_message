@@ -10,6 +10,14 @@ require_relative "pipefy_message/worker"
 require "logger"
 
 module PipefyMessage
+
+  def self.default_worker_options
+    @default_worker_options ||= {
+      "broker" => "gcp",
+      "queue" => "default"
+    }
+  end
+
   # Simple Test class to validate the project
   class Test
     def initialize
