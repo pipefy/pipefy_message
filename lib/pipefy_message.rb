@@ -7,6 +7,7 @@ require_relative "pipefy_message/base_consumer"
 require_relative "pipefy_message/base_publisher"
 require_relative "pipefy_message/logger"
 require_relative "pipefy_message/worker"
+require_relative "pipefy_message/providers/broker"
 require "logger"
 
 module PipefyMessage
@@ -14,7 +15,7 @@ module PipefyMessage
   def self.default_worker_options
     @default_worker_options ||= {
       "broker" => "gcp",
-      "queue" => "default"
+      "queue" => "http://localhost:4566"
     }
   end
 
