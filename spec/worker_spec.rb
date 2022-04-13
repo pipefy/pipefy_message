@@ -3,11 +3,16 @@
 RSpec.describe PipefyMessage::Worker do
   $result =~ nil
 
-  # class MockBroker < Broker
-  #   def poller
-  #     yield("test")
-  #   end
-  # end
+  class MockBroker < PipefyMessage::Providers::Broker
+    def poller
+      yield("test")
+    end
+  end
+  class MockBrokerFail < PipefyMessage::Providers::Broker
+    def poller
+      raise Exception.new "This is an exception"
+    end
+  end
   
   class TestWorker
     include PipefyMessage::Worker
@@ -19,12 +24,16 @@ RSpec.describe PipefyMessage::Worker do
   end
 
   describe "#perform" do
-
-    #mock PipefyMessage::Providers::AwsBroker -> MockBroker
-
-    it "allow call .perform from instance worker when call perform_async from ClassMethod" do
+    it "should call #perform from child instance when call #perform_async with success" do
+      allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
+      
       TestWorker.perform_async
       expect($result).to eq "test"
+    end
+
+    it "should call #perform from child instance when call #perform_async with fail(raise a exception)" do
+      allow(TestWorker).to receive(:build_instance_broker).and_return(MockBrokerFail.new)
+      expect{ TestWorker.perform_async }.to raise_error
     end
   end
 

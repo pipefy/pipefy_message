@@ -19,12 +19,16 @@ module PipefyMessage
         end
       end
       
-      def perform_async()
-        instance_broker = build_instance_broker
-        obj = self.new 
-        instance_broker.poller do |message|
-          obj.perform(message)
-        end 
+      def perform_async()  
+        begin
+          obj = self.new 
+          build_instance_broker.poller do |message|
+            obj.perform(message)
+          end
+        rescue Exception => exception
+          # TODO: Implement retry
+          raise exception
+        end
       end
 
       def build_instance_broker()        
