@@ -16,16 +16,17 @@ RSpec.describe PipefyMessage::Worker do
   
   class TestWorker
     include PipefyMessage::Worker
-    pipefymessage_options broker: "aws"
+    pipefymessage_options broker: "aws", queue: "http://localhost:4566/000000000000/pipefy-local-queue"
 
     def perform(message)
+      puts message
       $result = message
     end
   end
 
   describe "#perform" do
     it "should call #perform from child instance when call #perform_async with success" do
-      allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
+      # allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
       
       TestWorker.perform_async
       expect($result).to eq "test"
@@ -33,7 +34,7 @@ RSpec.describe PipefyMessage::Worker do
 
     it "should call #perform from child instance when call #perform_async with fail(raise a exception)" do
       allow(TestWorker).to receive(:build_instance_broker).and_return(MockBrokerFail.new)
-      expect{ TestWorker.perform_async }.to raise_error
+      expect{ TestWorker.perform_async }.to raise_error(Exception, /This is an exception/)
     end
   end
 
