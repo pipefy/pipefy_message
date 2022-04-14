@@ -9,23 +9,24 @@ module PipefyMessage
                 access_key_id:  (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
                 secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
                 endpoint:  (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
-                region:  (ENV["AWS_REGION"] || "us-east-1"),
-                stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] || "true")
+                region:  (ENV["AWS_REGION"] || "us-east-1")
             }
 
-            def initialize(queue_url)
+            def initialize(queue_name)
 
-                @config = AwsBroker.config_options
-                
-                Aws.config.update(@config)
+                begin
+                    @config = AwsBroker.config_options
+                    Aws.config.update(@config)
+                    
+                    @sqs = Aws::SQS::Client.new
+                    queue_url = @sqs.get_queue_url({queue_name: queue_name}).queue_url
+                    @poller = Aws::SQS::QueuePoller.new(queue_url)
+                    
+                    @wait_time_seconds = 10                    
+                rescue  (Aws::SQS::Errors::NonExistentQueue) => exception                    
+                    raise  PipefyMessage::Providers::Errors::ResourceError(exception.message)
+                end
 
-                
-                @sqs = Aws::SQS::Client.new(region: @config[:region])                
-                require "pry"; binding.pry
-
-                @poller = Aws::SQS::QueuePoller.new(queue_url)
-                @poller.before_request { stop! if user_interrupt == true }
-                @wait_time_seconds = 10
             end
 
             def self.config_options
@@ -35,7 +36,7 @@ module PipefyMessage
             def poller()
                 ## Aws poller 
                 @poller.poll(wait_time_seconds: @wait_time_seconds) do |received_message|
-                    payload = JSON.parse(received_message.body)
+                    payload = JSON.parse(received_message.body)                    
                     yield(payload)
                 end
             end
