@@ -8,6 +8,7 @@ require_relative "pipefy_message/base_publisher"
 require_relative "pipefy_message/logger"
 require_relative "pipefy_message/worker"
 require_relative "pipefy_message/providers/broker"
+require_relative "pipefy_message/providers/errors"
 require "logger"
 
 module PipefyMessage
