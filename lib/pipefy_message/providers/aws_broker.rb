@@ -6,6 +6,7 @@ module PipefyMessage
     class AwsBroker < Broker
       def initialize(queue_name, opts={})
         @config = build_options(opts)
+        # require 'pry'; binding.pry
         Aws.config.update(@config)
         @sqs = Aws::SQS::Client.new
 
