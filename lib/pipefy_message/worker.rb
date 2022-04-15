@@ -12,8 +12,8 @@ module PipefyMessage
     # ClassMethods
     module ClassMethods
       def pipefymessage_options(opts = {})
-        options_hash = PipefyMessage.default_worker_options.merge(opts.transform_keys(&:to_s))
-        options_hash.each do |k, v|
+        @options_hash = PipefyMessage.default_worker_options.merge(opts.transform_keys(&:to_s))
+        @options_hash.each do |k, v|
           singleton_class.class_eval { attr_accessor k }
           send("#{k}=", v)
         end
@@ -34,7 +34,7 @@ module PipefyMessage
       map = { "aws" => "PipefyMessage::Providers::AwsBroker" }
       require_relative "providers/#{broker}_broker"
 
-      map[broker].constantize.new(queue)
+      map[broker].constantize.new(queue_name, @options_hash)
     end
   end
 end

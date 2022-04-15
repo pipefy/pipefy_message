@@ -17,7 +17,7 @@ RSpec.describe PipefyMessage::Worker do
 
   class TestWorker
     include PipefyMessage::Worker
-    pipefymessage_options broker: "aws", queue: "pipefy-local-queue"
+    pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
 
     def perform(message)
       puts message
