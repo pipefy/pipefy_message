@@ -26,7 +26,7 @@ module PipefyMessage
         map[broker].constantize.new(queue_name, @options_hash)
       end
 
-      def perform_async
+      def process_message
         begin
           obj = new
           puts "await for messages..."

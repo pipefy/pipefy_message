@@ -26,16 +26,16 @@ RSpec.describe PipefyMessage::Worker do
   end
 
   describe "#perform" do
-    it "should call #perform from child instance when call #perform_async with success" do
+    it "should call #perform from child instance when call #process_message with success" do
       allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
 
-      TestWorker.perform_async
+      TestWorker.process_message
       expect($result).to eq "test"
     end
 
-    it "should call #perform from child instance when call #perform_async with fail(raise a ResourceError)" do
+    it "should call #perform from child instance when call #process_message with fail(raise a ResourceError)" do
       allow(TestWorker).to receive(:build_instance_broker).and_return(MockBrokerFail.new)
-      expect { TestWorker.perform_async }.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
+      expect { TestWorker.process_message }.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
     end
   end
 
