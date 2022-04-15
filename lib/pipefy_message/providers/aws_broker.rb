@@ -4,30 +4,32 @@ require "json"
 module PipefyMessage
   module Providers
     class AwsBroker < Broker
-      @@default_options = {
-        access_key_id: (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
-        secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
-        endpoint: (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
-        region: (ENV["AWS_REGION"] || "us-east-1"),
-        stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] || false)
-      }
-
       def initialize(queue_name)
-        @config = AwsBroker.config_options
+        @config = build_options
         Aws.config.update(@config)
 
         @sqs = Aws::SQS::Client.new
+        # require 'pry'; binding.pry
         queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
         @poller = Aws::SQS::QueuePoller.new(queue_url)
 
         @wait_time_seconds = 10
-        super
-      rescue (Aws::SQS::Errors::NonExistentQueue) => e
+      rescue Aws::SQS::Errors::NonExistentQueue, Seahorse::Client::NetworkingError => e
         raise PipefyMessage::Providers::Errors::ResourceError, e.message
       end
 
-      def self.config_options
-        @@default_options
+      def default_options
+        {
+          access_key_id: (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
+          secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
+          endpoint: (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
+          region: (ENV["AWS_REGION"] || "us-east-1"),
+          stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] == "true")
+        }
+      end
+
+      def build_options
+        default_options.merge({})
       end
 
       def poller
