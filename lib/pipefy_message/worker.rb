@@ -19,22 +19,25 @@ module PipefyMessage
         end
       end
 
-      def perform_async
-        obj = new
-        build_instance_broker.poller do |message|
-          obj.perform(message)
-        end
-      rescue Exception => e
-        # TODO: Implement retry
-        raise e
+      def build_instance_broker
+        map = { "aws" => "PipefyMessage::Providers::AwsBroker" }
+        require_relative "providers/#{broker}_broker"
+
+        map[broker].constantize.new(queue_name, @options_hash)
       end
-    end
 
-    def build_instance_broker
-      map = { "aws" => "PipefyMessage::Providers::AwsBroker" }
-      require_relative "providers/#{broker}_broker"
-
-      map[broker].constantize.new(queue_name, @options_hash)
+      def perform_async
+        begin
+          obj = new
+          puts "await for messages..."
+          build_instance_broker.poller do |message|
+            obj.perform(message)
+          end
+        rescue Exception => e
+          # TODO: Implement retry
+          raise e
+        end
+      end
     end
   end
 end

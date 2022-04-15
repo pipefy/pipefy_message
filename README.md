@@ -68,10 +68,21 @@ On the irb console:
 
 * Consume a message
     ```ruby
-    require 'pipefy_message'
-    message = PipefyMessage::Test.new
-    message.consume
+      require "pipefy_message"
+
+      class TestWorker
+        include PipefyMessage::Worker
+        pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
+
+        def perform(message)
+          puts message
+        end
+      end
+
+      TestWorker.perform_async
     ```
+
+    
 
 * Publish and Consume a message
     ```ruby
