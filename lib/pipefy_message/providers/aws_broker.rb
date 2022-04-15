@@ -4,12 +4,11 @@ require "json"
 module PipefyMessage
   module Providers
     class AwsBroker < Broker
-      def initialize(queue_name)
-        @config = build_options
+      def initialize(queue_name, opts={})
+        @config = build_options(opts)
         Aws.config.update(@config)
-
         @sqs = Aws::SQS::Client.new
-        # require 'pry'; binding.pry
+
         queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
         @poller = Aws::SQS::QueuePoller.new(queue_url)
 
@@ -28,8 +27,8 @@ module PipefyMessage
         }
       end
 
-      def build_options
-        default_options.merge({})
+      def build_options(opts)
+        default_options.merge(opts)
       end
 
       def poller

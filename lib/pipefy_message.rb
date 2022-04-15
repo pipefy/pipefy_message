@@ -11,11 +11,10 @@ require_relative "pipefy_message/providers/errors"
 require "logger"
 
 module PipefyMessage
-
   def self.default_worker_options
     @default_worker_options ||= {
-      "broker" => "gcp",
-      "queue" => "http://localhost:4566"
+      "broker" => "aws",
+      "queue_name" => "my_queue"
     }
   end
 
