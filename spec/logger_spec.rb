@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class LoggerTester
-  include Logging
+  include PipefyMessage::Logging
 end
 
 # Tbh, I dunno how to make these "real" tests; this is essentially
@@ -13,6 +13,6 @@ RSpec.describe LoggerTester do
   end
 
   it "is available as a class method" do
-    described_class.logger.error("Class logger error")
+    described_class.logger.info("Class logger info")
   end
 end
