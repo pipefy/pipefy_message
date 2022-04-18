@@ -1,17 +1,19 @@
 # frozen_string_literal: true
 
 require "singleton"
+require_relative "logging" # why is this necessary?
 
 module PipefyMessage
-  # ClassMethods
   module Worker
+    include PipefyMessage::Logging
+
     def self.included(base)
+      base.extend(self)
       base.extend(ClassMethods)
     end
-
-    # ClassMethods
     module ClassMethods
       def pipefymessage_options(opts = {})
+        logger.info("Setting worker options")
         @options_hash = PipefyMessage.default_worker_options.merge(opts.transform_keys(&:to_s))
         @options_hash.each do |k, v|
           singleton_class.class_eval { attr_accessor k }
