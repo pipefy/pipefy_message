@@ -28,9 +28,9 @@ module PipefyMessage
     def self.logger_setup
       logger = Logger.new(logfile)
 
-      logger.formatter = proc do |severity, datetime, progname, msg|
-        JSON.dump(date: "#{formatted_timestamp(datetime)}", severity:"#{severity}", message: msg) + "\n"
-      end
+      # logger.formatter = proc do |severity, datetime, progname, msg|
+      #   JSON.dump(date: "#{formatted_timestamp(datetime)}", severity:"#{severity}", message: msg) + "\n"
+      # end
 
       logger
     end
@@ -42,9 +42,29 @@ module PipefyMessage
       datetime
     end
 
+    # Formats logger output as a JSON object, including information on
+    # the calling object. Should not be called directly; this method is
+    # called implicitly whenever a logger method is called. 
+    def self.json_output(obj, severity, datetime, progname, msg)
+      timestamp = formatted_timestamp(datetime)
+
+      {:date => "#{timestamp}",
+      :severity => "#{severity}",
+      :calling_obj => "#{obj}",
+      :calling_obj_class => "#{obj.class}",
+      :message => msg}
+    end
+
     # Logger method available to all instances of classes
     # that include the Logging module (as an instance method).
+    # Includes information on the calling object.
     def logger
+      Logging.logger.formatter = proc do |severity, datetime, progname, msg|
+        json_hash = Logging.json_output(self, severity, datetime, progname, msg)
+
+        JSON.dump(json_hash) + "\n"
+      end
+      
       Logging.logger
     end
 
