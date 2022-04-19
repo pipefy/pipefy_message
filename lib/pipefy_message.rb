@@ -23,9 +23,7 @@ module PipefyMessage
 
   # Simple Test class to validate the project
   class Test
-    def initialize
-      @log = PipefyMessage::CustomLogger.new
-    end
+    include Logging
 
     def publish
       payload = { foo: "bar" }
@@ -33,9 +31,9 @@ module PipefyMessage
     end
 
     def consume
-      @log.info("Starting the consumer process")
+      logger.info("Starting the consumer process")
       consumer = BaseConsumer.new("http://localhost:4566/000000000000/pipefy-local-queue")
-      @log.info("Creating new instance of consumer #{consumer}")
+      logger.info("Creating new instance of consumer #{consumer}")
       consumer.consume_message
     end
 
