@@ -5,11 +5,13 @@ require_relative "pipefy_message/broker/aws/configuration"
 require_relative "pipefy_message/broker/aws/sns/publisher"
 require_relative "pipefy_message/base_consumer"
 require_relative "pipefy_message/base_publisher"
-require_relative "pipefy_message/logger"
 require_relative "pipefy_message/worker"
 require_relative "pipefy_message/providers/broker"
 require_relative "pipefy_message/providers/errors"
+require_relative "pipefy_message/logging" # shared logger config
 require "logger"
+require "json"
+require "benchmark"
 
 module PipefyMessage
   def self.default_worker_options
