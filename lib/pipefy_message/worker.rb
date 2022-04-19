@@ -73,39 +73,30 @@ module PipefyMessage
         map[broker].constantize.new(queue_name, @options_hash)
       end
 
+      ##
       # Instantiates a broker object (see build_instance_broker method),
       # polls the queue given in the options and forwards received
       # messages for processing by a newly created instance of the class
       # from which the call to process_message was made (see perform
       # method in the parent module).
       def process_message
+        start = Time.now
         obj = new
-
-        logger.info({
-                      broker: broker,
-                      message_text: "Calling poller for #{broker} object"
-                    })
+        logger.info({ message_text: "Calling poller for #{broker} object" })
 
         build_instance_broker.poller do |message|
-          logger.info({
-                        broker: broker,
-                        message_text: "Message received by #{broker} poller to be processed by worker",
-                        received_message: message # necessary? TMI?
-                      })
-
-          elapsed_time = Benchmark.realtime do
-            # what would the best measurement be?
-            obj.perform(message)
-          end
-
-          logger.info({
-                        duration_seconds: elapsed_time,
-                        message_text: "Message received by #{broker} poller processed by #{name} worker in #{elapsed_time} seconds"
-                      })
+          logger.info({ message_text: "Message received by #{broker} poller to be processed by worker",
+                        received_message: message })
+          obj.perform(message)
         end
       rescue Exception => e
-        # TODO: Implement retry
         raise e
+      ensure
+        elapsed_time = (Time.now - start) * 1000.0
+        logger.info({
+                      duration_seconds: elapsed_time,
+                      message_text: "Message received by #{broker} poller processed by #{name} worker in #{elapsed_time} seconds"
+                    })
       end
     end
   end

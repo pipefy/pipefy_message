@@ -10,15 +10,11 @@ module PipefyMessage
       def initialize(queue_name, opts = {})
         @config = build_options(opts)
         Aws.config.update(@config[:aws])
-        logger.debug({
-                       options_set: @config,
-                       message_text: "AWS connection opened with options_set"
-                     })
+        logger.debug({ options_set: @config, message_text: "AWS connection opened with options_set" })
 
         @sqs = Aws::SQS::Client.new
         queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
-
-        @poller = Aws::SQS::QueuePoller.new(queue_url)
+        @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
 
         @wait_time_seconds = 10 # shouldn't we use the config for this?
       rescue Aws::SQS::Errors::NonExistentQueue, Seahorse::Client::NetworkingError => e

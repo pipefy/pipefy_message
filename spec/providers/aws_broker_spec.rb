@@ -15,6 +15,10 @@ RSpec.describe PipefyMessage::Providers::AwsBroker do
         mocked_message = { message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
                            receipt_handle: "2312dasdas1231221312321adsads",
                            body: "{\"Message\": {\"foo\": \"bar\"}}" }
+
+        Aws.config[:sqs] = {
+          stub_responses: true
+        }
         mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
                                                   { skip_delete: true })
         mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
@@ -24,6 +28,7 @@ RSpec.describe PipefyMessage::Providers::AwsBroker do
         mocked_list.append(mocked_element)
         mocked_poller.client.stub_responses(:receive_message, messages: mocked_list)
       end
+
       it "should consume message" do
         worker = PipefyMessage::Providers::AwsBroker.new("my_queue")
         worker.instance_variable_set(:@poller, mocked_poller)

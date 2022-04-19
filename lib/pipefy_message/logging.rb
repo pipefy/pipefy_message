@@ -27,16 +27,12 @@ module PipefyMessage
 
     # Configuration for a logger created by the Ruby logger gem.
     def self.logger_setup
+      loglevels = %w[DEBUG INFO WARN ERROR FATAL UNKNOWN].freeze
       logger = Logger.new(logfile)
-
-      if ENV.fetch("ASYNC_ENABLE_NON_ERROR_LOGS", "true")
-        logger.info!
-      else
-        logger.error!
-      end
-
+      level ||= loglevels.index ENV.fetch("LOG_LEVEL", "INFO")
+      level ||= Logger::INFO
+      logger.level = level
       logger
-
     end
 
     # Allows for custom datetime formatting. Return the datetime
@@ -49,7 +45,7 @@ module PipefyMessage
     # Formats logger output as a JSON object, including information on
     # the calling object. Should not be called directly; this method is
     # called implicitly whenever a logger method is called.
-    def self.json_output(obj, severity, datetime, _progname, msg)
+    def self.json_output(obj, severity, datetime, progname, msg)
       timestamp = formatted_timestamp(datetime)
 
       { date: timestamp.to_s,
