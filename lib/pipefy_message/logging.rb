@@ -26,7 +26,16 @@ module PipefyMessage
 
     # Configuration for a logger created by the Ruby logger gem.
     def self.logger_setup
-      Logger.new(logfile)
+      logger = Logger.new(logfile)
+
+      if ENV.fetch("ASYNC_ENABLE_NON_ERROR_LOGS", "true")
+        logger.info!
+      else
+        logger.error!
+      end
+
+      logger
+
     end
 
     # Allows for custom datetime formatting. Return the datetime
@@ -40,10 +49,12 @@ module PipefyMessage
     # the calling object. Should not be called directly; this method is
     # called implicitly whenever a logger method is called.
     def self.json_output(obj, severity, datetime, progname, msg)
-      timestamp = formatted_timestamp(datetime)
+      formatted_date = formatted_timestamp(datetime)
 
-      {:date => "#{timestamp}",
-      :severity => "#{severity}",
+      {:timestamp => "#{formatted_date}",
+      :level => "#{severity}",
+      :app => "#{progname}",
+      :contex =>  "async_processing",
       :calling_obj => "#{obj}",
       :calling_obj_class => "#{obj.class}",
       :message => msg}
@@ -56,7 +67,7 @@ module PipefyMessage
       Logging.logger.formatter = proc do |severity, datetime, progname, msg|
         json_hash = Logging.json_output(self, severity, datetime, progname, msg)
 
-        JSON.dump(json_hash) + "\n"
+        JSON.dump(json_hash) + ($INPUT_RECORD_SEPARATOR || "\n")
       end
       
       Logging.logger
