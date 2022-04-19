@@ -10,6 +10,8 @@ require_relative "pipefy_message/providers/broker"
 require_relative "pipefy_message/providers/errors"
 require_relative "pipefy_message/logging" # shared logger config
 require "logger"
+require "json"
+require "benchmark"
 
 module PipefyMessage
   def self.default_worker_options
