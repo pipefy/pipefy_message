@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "logger"
+require "json"
 # require "json"
 
 module PipefyMessage
@@ -39,14 +40,14 @@ module PipefyMessage
     # Formats logger output as a JSON object, including information on
     # the calling object. Should not be called directly; this method is
     # called implicitly whenever a logger method is called.
-    def self.json_output(obj, severity, datetime, progname, msg)
+    def self.json_output(obj, severity, datetime, _progname, msg)
       timestamp = formatted_timestamp(datetime)
 
-      {:date => "#{timestamp}",
-      :severity => "#{severity}",
-      :calling_obj => "#{obj}",
-      :calling_obj_class => "#{obj.class}",
-      :message => msg}
+      { date: timestamp.to_s,
+        severity: severity.to_s,
+        calling_obj: obj.to_s,
+        calling_obj_class: obj.class.to_s,
+        message: msg }
     end
 
     # Logger method available to all instances of classes
@@ -58,7 +59,7 @@ module PipefyMessage
 
         JSON.dump(json_hash) + "\n"
       end
-      
+
       Logging.logger
     end
 
