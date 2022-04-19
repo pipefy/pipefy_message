@@ -21,8 +21,9 @@ module PipefyMessage
         queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
 
         logger.debug(JSON.dump({
+          :sqs_queue_name => queue_name,
           :sqs_queue_url => queue_url,
-          :message_text => "AWS SQS url resolved to #{queue_url}"
+          :message_text => "AWS SQS queue #{queue_name} URL found"
         }))
 
         @poller = Aws::SQS::QueuePoller.new(queue_url)
