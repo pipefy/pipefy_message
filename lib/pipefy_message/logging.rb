@@ -2,7 +2,6 @@
 
 require "logger"
 require "json"
-# require "json"
 
 module PipefyMessage
   # Provides a shared logger setup to all classes and instances of classes

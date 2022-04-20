@@ -2,7 +2,7 @@
 
 require "aws-sdk-sns"
 require "json"
-require "logger"
+require_relative "../../../logging" # why is this necessary?
 require_relative "../configuration"
 
 module PipefyMessage
@@ -10,11 +10,11 @@ module PipefyMessage
     module AwsProvider
       # Aws SNS Publisher class to publish json messages into a specific topic
       class SnsPublisher
+        include Logging
         def initialize
           aws_config = PipefyMessage::BrokerConfiguration::AwsProvider::ProviderConfig.instance
           aws_config.setup_connection
           @sns = Aws::SNS::Resource.new
-          @log = PipefyMessage::CustomLogger.new
           default_arn_prefix = "arn:aws:sns:us-east-1:000000000000:"
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || default_arn_prefix
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
@@ -38,12 +38,12 @@ module PipefyMessage
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          @log.info("Publishing a json message to topic #{topic_arn}")
+          logger.info("Publishing a json message to topic #{topic_arn}")
           result = topic.publish({ message: message.to_json, message_structure: " json " })
-          @log.info(" Message Published with ID #{result.message_id}")
+          logger.info(" Message Published with ID #{result.message_id}")
           result
         rescue StandardError => e
-          @log.error("Failed to publish message [#{message}], error details: [#{e.inspect}]")
+          logger.error("Failed to publish message [#{message}], error details: [#{e.inspect}]")
         end
       end
     end
