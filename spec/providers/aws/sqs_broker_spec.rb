@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-require_relative "../../lib/pipefy_message/providers/aws_client/sqs_broker"
+require_relative "../../../lib/pipefy_message/providers/aws_client/sqs_broker"
 
 RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   context "#SqsBroker" do
     before do
+      stub_const("ENV", ENV.to_hash.merge("AWS_ENDPOINT" => "http://localhost:4566"))
       stub_const("ENV", ENV.to_hash.merge("AWS_CLI_STUB_RESPONSE" => "true"))
     end
 
@@ -16,6 +17,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
                            receipt_handle: "2312dasdas1231221312321adsads",
                            body: "{\"Message\": {\"foo\": \"bar\"}}" }
 
+        Aws.config.update({ endpoint: "http://localhost:4566" })
         Aws.config[:sqs] = {
           stub_responses: true
         }
