@@ -16,7 +16,7 @@ module PipefyMessage
     private
 
     def publisher_instance
-      map = PipefyMessage.class_path[@broker]
+      map = PipefyMessage.class_path[@broker.to_sym]
       require_relative map[:publisher][:relative_path]
 
       logger.info({

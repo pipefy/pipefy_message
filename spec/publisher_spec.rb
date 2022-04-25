@@ -31,11 +31,11 @@ RSpec.describe PipefyMessage::Publisher do
       expect(mocked_publisher_impl).to have_received(:publish).with(payload, topic_name)
     end
 
-    # it "should choose the correct broker implementation" do
-    #   result = PipefyMessage::Publisher::BasePublisher.new.send(:publisher_instance)
-    #   expected_impl = PipefyMessage::Publisher::AwsProvider::SnsPublisher
+    it "should choose the correct broker implementation" do
+      result = PipefyMessage::Publisher.new.send(:publisher_instance)
+      expected_impl = PipefyMessage::Providers::AwsClient::SnsBroker
 
-    #   expect(result).to be_a expected_impl
-    # end
+      expect(result).to be_a expected_impl
+    end
   end
 end

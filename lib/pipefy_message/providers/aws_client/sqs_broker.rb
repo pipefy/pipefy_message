@@ -5,7 +5,7 @@ module PipefyMessage
   module Providers
     module AwsClient
       # AWS SQS client.
-      class SqsBroker < PipefyMessage::Providers::Broker
+      class SqsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
         attr_reader :config
 
         def initialize(queue_name, opts = {})

@@ -1,7 +1,8 @@
 module PipefyMessage
   module Providers
     module AwsClient
-      class BuilderAwsConfig
+      class AwsBroker < PipefyMessage::Providers::Broker
+        
       end
     end
   end

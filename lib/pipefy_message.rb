@@ -11,6 +11,8 @@ require_relative "pipefy_message/providers/errors"
 require "logger"
 require "json"
 require "benchmark"
+require "active_support"
+require "active_support/core_ext/string/inflections"
 
 ##
 # PipefyMessage abstraction async process
