@@ -15,7 +15,7 @@ module PipefyMessage
     # default values to consumer
     def self.default_worker_options
       @default_worker_options ||= {
-        "broker" => "aws",
+        "broker" => "sqs",
         "queue_name" => "my_queue"
       }
     end
@@ -62,8 +62,8 @@ module PipefyMessage
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
-        map = { "aws" => "PipefyMessage::Providers::AwsBroker" }
-        require_relative "providers/#{broker}_broker"
+        map = { "sqs" => "PipefyMessage::Providers::AwsClient::SqsBroker" }
+        require_relative "providers/aws_client/#{broker}_broker"
 
         logger.info({
                       broker: broker,

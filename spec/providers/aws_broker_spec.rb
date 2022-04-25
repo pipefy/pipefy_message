@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "../../lib/pipefy_message/providers/aws_broker"
+require_relative "../../lib/pipefy_message/providers/aws_client/sqs_broker"
 
-RSpec.describe PipefyMessage::Providers::AwsBroker do
-  context "#AwsBroker" do
+RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
+  context "#SqsBroker" do
     before do
       stub_const("ENV", ENV.to_hash.merge("AWS_CLI_STUB_RESPONSE" => "true"))
     end
@@ -30,7 +30,7 @@ RSpec.describe PipefyMessage::Providers::AwsBroker do
       end
 
       it "should consume message" do
-        worker = PipefyMessage::Providers::AwsBroker.new("my_queue")
+        worker = PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
         worker.instance_variable_set(:@poller, mocked_poller)
 
         result = nil
@@ -55,7 +55,7 @@ RSpec.describe PipefyMessage::Providers::AwsBroker do
           )
 
         expect do
-          PipefyMessage::Providers::AwsBroker.new("my_queue")
+          PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
         end.to raise_error(PipefyMessage::Providers::Errors::ResourceError,
                            /The specified queue my_queue does not exist for this wsdl version/)
       end
@@ -71,7 +71,7 @@ RSpec.describe PipefyMessage::Providers::AwsBroker do
           )
 
         expect do
-          PipefyMessage::Providers::AwsBroker.new("my_queue")
+          PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
         end.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
       end
     end

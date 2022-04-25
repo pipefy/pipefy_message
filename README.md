@@ -72,7 +72,7 @@ On the irb console:
 
       class TestWorker
         include PipefyMessage::Worker
-        pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
+        pipefymessage_options broker: "sqs", queue_name: "pipefy-local-queue"
 
         def perform(message)
           puts message
@@ -93,7 +93,7 @@ On the irb console:
 
 ## Project Stack
 
-- [Aws SDK Ruby - SNS & SQS](https://github.com/aws/aws-sdk-ruby)
+- [Aws SDK Ruby - SNS & SQS](https://github.com/aws_client/aws-sdk-ruby)
 - [Bundler](https://bundler.io/)
 - Docker-compose
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -103,7 +103,7 @@ On the irb console:
 
 ## Brokers Documentation
 
-* [SNS & SQS User guide](https://github.com/pipefy/pipefy_message/tree/main/lib/pipefy_message/broker/aws/README.md)
+* [SNS & SQS User guide](https://github.com/pipefy/pipefy_message/tree/main/lib/pipefy_message/broker/aws_client/README.md)
 
 ## Contributing
 

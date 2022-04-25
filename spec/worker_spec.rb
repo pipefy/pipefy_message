@@ -17,7 +17,7 @@ RSpec.describe PipefyMessage::Worker do
 
   class TestWorker
     include PipefyMessage::Worker
-    pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
+    pipefymessage_options broker: "sqs", queue_name: "pipefy-local-queue"
 
     def perform(message)
       puts message
@@ -41,7 +41,7 @@ RSpec.describe PipefyMessage::Worker do
 
   describe "#options class" do
     it "should set options in class" do
-      expect(TestWorker.broker).to eq "aws"
+      expect(TestWorker.broker).to eq "sqs"
     end
   end
 end
