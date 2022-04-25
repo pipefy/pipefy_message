@@ -15,7 +15,7 @@ module PipefyMessage
     # default values to consumer
     def self.default_worker_options
       @default_worker_options ||= {
-        "broker" => "sqs",
+        "broker" => "aws",
         "queue_name" => "my_queue"
       }
     end
@@ -62,7 +62,7 @@ module PipefyMessage
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
-        map = PipefyMessage.class_path[broker]
+        map = PipefyMessage.class_path[broker.to_sym]
         require_relative map[:consumer][:relative_path]
 
         logger.info({

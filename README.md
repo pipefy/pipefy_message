@@ -72,7 +72,7 @@ On the irb console:
 
       class TestWorker
         include PipefyMessage::Worker
-        pipefymessage_options broker: "sqs", queue_name: "pipefy-local-queue"
+        pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
 
         def perform(message)
           puts message
