@@ -9,6 +9,10 @@ module PipefyMessage
         raise NotImplementedError, "Method #{__method__} should be implemented by classes including #{method(__method__).owner}"
       end
 
+      def publish(payload, topic_name)
+        raise NotImplementedError, "Method #{__method__} should be implemented by classes including #{method(__method__).owner}"
+      end
+
       def default_options
         {}
       end

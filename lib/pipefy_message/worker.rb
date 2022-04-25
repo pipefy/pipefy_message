@@ -62,15 +62,15 @@ module PipefyMessage
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
-        map = { "sqs" => "PipefyMessage::Providers::AwsClient::SqsBroker" }
-        require_relative "providers/aws_client/#{broker}_broker"
+        map = PipefyMessage.class_path[broker]
+        require_relative map[:consumer][:relative_path]
 
         logger.info({
                       broker: broker,
                       message_text: "Initializing and returning instance of #{broker} broker"
                     })
 
-        map[broker].constantize.new(queue_name, @options_hash)
+        map[:consumer][:class_name].constantize.new(queue_name, @options_hash)
       end
 
       ##
