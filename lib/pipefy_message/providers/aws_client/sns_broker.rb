@@ -8,9 +8,7 @@ module PipefyMessage
         attr_reader :config
 
         def initialize(opts = {})
-          @config = build_options(opts)
-          Aws.config.update(@config[:aws])
-          logger.debug({ options_set: @config, message_text: "AWS connection opened with options_set" })
+          super(opts)
 
           @sns = Aws::SNS::Resource.new
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]

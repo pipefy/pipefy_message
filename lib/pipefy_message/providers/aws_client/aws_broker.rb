@@ -8,6 +8,13 @@ module PipefyMessage
       # "Abstract" superclass for brokers of AWS services, implementing
       # AWS option parsing and connection setup.
       class AwsBroker < PipefyMessage::Providers::Broker
+
+        def initialize(opts = {})
+          @config = build_options(opts)
+          Aws.config.update(@config[:aws])
+          logger.debug({ options_set: @config, message_text: "AWS connection opened with options_set" })
+        end
+        
         ##
         # Hash with default options to be used in AWS access configuration
         # if no overriding parameters are provided.

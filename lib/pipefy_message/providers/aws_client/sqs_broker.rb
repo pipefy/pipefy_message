@@ -8,9 +8,7 @@ module PipefyMessage
         attr_reader :config
 
         def initialize(queue_name, opts = {})
-          @config = build_options(opts)
-          Aws.config.update(@config[:aws])
-          logger.debug({ options_set: @config, message_text: "AWS connection opened with options_set" })
+          super(opts)
 
           @sqs = Aws::SQS::Client.new
           queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
