@@ -17,6 +17,9 @@ module PipefyMessage
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
 
+        ##
+        # Publishes a message with the given payload to the SNS topic
+        # with topic_name.
         def publish(payload, topic_name)
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
@@ -41,14 +44,16 @@ module PipefyMessage
           logger.error(
             { topic_arn: topic_arn,
               message_text: "Failed to publish message",
-              error_details: e.inspect}
+              error_details: e.inspect }
           )
         end
 
         private
 
+        ##
+        # "Wraps" the message payload as the value of the "default" key
+        # in a hash, as specified by the AWS Ruby SDK.
         def prepare_payload(payload)
-          # The 'Default' json key/entry is mandatory to Ruby sdk
           {
             "default" => payload
           }
