@@ -22,18 +22,33 @@ module PipefyMessage
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          logger.info("Publishing a json message to topic #{topic_arn}")
+          logger.info(
+            { topic_arn: topic_arn,
+              payload: payload,
+              message_text: "Attempting to publish a json message to topic #{topic_arn}" }
+          )
+
           result = topic.publish({ message: message.to_json, message_structure: " json " })
-          logger.info(" Message Published with ID #{result.message_id}")
+
+          logger.info(
+            { topic_arn: topic_arn,
+              id: result.message_id,
+              message_text: "Message published with ID #{result.message_id}" }
+          )
+
           result
         rescue StandardError => e
-          logger.error("Failed to publish message [#{message}], error details: [#{e.inspect}]")
+          logger.error(
+            { topic_arn: topic_arn,
+              message_text: "Failed to publish message",
+              error_details: e.inspect}
+          )
         end
 
         private
 
         def prepare_payload(payload)
-          # The 'Default' json key/entry is mandatory to ruby sdk
+          # The 'Default' json key/entry is mandatory to Ruby sdk
           {
             "default" => payload
           }
