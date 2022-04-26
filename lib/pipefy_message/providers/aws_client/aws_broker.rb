@@ -1,8 +1,13 @@
+require "aws-sdk-sqs"
+require "json"
+
 module PipefyMessage
   module Providers
     module AwsClient
+      ##
+      # "Abstract" superclass for brokers of AWS services, implementing
+      # AWS option parsing and connection setup.
       class AwsBroker < PipefyMessage::Providers::Broker
-
         ##
         # Hash with default options to be used in AWS access configuration
         # if no overriding parameters are provided.
@@ -47,7 +52,7 @@ module PipefyMessage
             region: hash[:region],
             stub_responses: hash[:stub_responses]
           }
-        end       
+        end
       end
     end
   end

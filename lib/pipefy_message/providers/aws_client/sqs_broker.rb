@@ -1,5 +1,3 @@
-require "aws-sdk-sqs"
-require "json"
 require_relative "aws_broker"
 
 module PipefyMessage
