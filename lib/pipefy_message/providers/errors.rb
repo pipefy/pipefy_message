@@ -7,6 +7,12 @@ module PipefyMessage
           super
         end
       end
+
+      class InvalidOption < ArgumentError
+        def initialize(msg = "InvalidOption")
+          super
+        end
+      end
     end
   end
 end

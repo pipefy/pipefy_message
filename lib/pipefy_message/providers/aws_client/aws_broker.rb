@@ -8,7 +8,6 @@ module PipefyMessage
       # "Abstract" superclass for brokers of AWS services, implementing
       # AWS option parsing and connection setup.
       class AwsBroker < PipefyMessage::Providers::Broker
-
         def initialize(opts = {})
           @config = build_options(opts)
           Aws.config.update(@config[:aws])

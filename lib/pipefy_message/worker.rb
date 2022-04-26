@@ -7,12 +7,12 @@ module PipefyMessage
   ##
   # Provides a provider-agnostic, higher level abstraction for
   # dealing with queue polling and message parsing.
-  # Should be included by classes hat implement a perform method, for
+  # Should be included by classes that implement a perform method, for
   # processing received messages.
   module Worker
     include PipefyMessage::Logging
     ##
-    # default values to consumer
+    # Default options for consumer setup.
     def self.default_worker_options
       @default_worker_options ||= {
         "broker" => "aws",
@@ -21,9 +21,8 @@ module PipefyMessage
     end
 
     ##
-    # to make the logger available as a static method
-    # see ClassMethods; this is what makes
-    # those methods available to the base class
+    # Makes methods available as a static/class methods
+    # (see ClassMethods).
     def self.included(base)
       base.extend(self)
       base.extend(ClassMethods)
@@ -62,15 +61,26 @@ module PipefyMessage
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
-        map = PipefyMessage.class_path[broker.to_sym]
-        require_relative map[:consumer][:relative_path]
+        provider_map = PipefyMessage.class_path[broker.to_sym]
+
+        if provider_map.nil?
+          logger.error({
+            invalid_provider: broker,
+            message_text: "Invalid provider specified: #{broker}"
+          })
+
+          raise InvalidOption
+        end
+
+        consumer_map = provider_map[:consumer]
+        require_relative consumer_map[:relative_path]
 
         logger.info({
                       broker: broker,
                       message_text: "Initializing and returning instance of #{broker} broker"
                     })
 
-        map[:consumer][:class_name].constantize.new(queue_name, @options_hash)
+                    consumer_map[:class_name].constantize.new(queue_name, @options_hash)
       end
 
       ##
