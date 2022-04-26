@@ -1,3 +1,4 @@
+require "aws-sdk-sns"
 require_relative "aws_broker"
 
 module PipefyMessage
