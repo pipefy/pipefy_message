@@ -104,7 +104,7 @@ module PipefyMessage
             })
           obj.perform(message)
         end
-      rescue Exception => e
+      rescue PipefyMessage::Providers::Errors::ResourceError => e # (any others?)
         raise e
       ensure
         elapsed_time = (Time.now - start) * 1000.0
