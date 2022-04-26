@@ -17,41 +17,8 @@ module PipefyMessage
           @sns = Aws::SNS::Resource.new
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
-        rescue StandardError => e
+        rescue Aws::SQS::Errors::NonExistentQueue, Seahorse::Client::NetworkingError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
-        end
-
-        ##
-        # Hash with default options to be used in AWS access configuration
-        # if no overriding parameters are provided.
-        def default_options
-          {
-            access_key_id: (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
-            secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
-            endpoint: (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
-            region: (ENV["AWS_REGION"] || "us-east-1"),
-            stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] == "true"),
-            wait_time_seconds: 10,
-            default_arn_prefix: "arn:aws:sns:us-east-1:000000000000:"
-          }
-        end
-
-        ##
-        # Merges default options (returned by default_options) with the
-        # hash provided as an argument. The latter takes precedence.
-        def build_options(opts)
-          hash = default_options.merge(opts)
-          aws_hash = isolate_broker_arguments(hash)
-
-          config_hash = {
-            aws: aws_hash
-          }
-
-          hash.each do |k, v|
-            config_hash[k] = v unless aws_hash.key?(k)
-          end
-
-          config_hash
         end
 
         def publish(payload, topic_name)
@@ -73,18 +40,6 @@ module PipefyMessage
           # The 'Default' json key/entry is mandatory to ruby sdk
           {
             "default" => payload
-          }
-        end
-
-        ##
-        # Options hash parser.
-        def isolate_broker_arguments(hash)
-          {
-            access_key_id: hash[:access_key_id],
-            secret_access_key: hash[:secret_access_key],
-            endpoint: hash[:endpoint],
-            region: hash[:region],
-            stub_responses: hash[:stub_responses]
           }
         end
       end
