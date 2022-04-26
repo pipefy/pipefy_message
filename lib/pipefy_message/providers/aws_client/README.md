@@ -8,7 +8,7 @@
 
 ### Aws-cli Installation
 
-Before proceed to the next step it's required to have the aws-cli installed in your machine, for that follow [this guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+Before proceeding to the next step it's required to have the aws-cli installed in your machine, for that follow [this guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
 
 > **Note that we must have the project docker-compose localstack service running before executing the commands above**
 ### Creating new SNS Topic
