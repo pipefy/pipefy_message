@@ -69,7 +69,10 @@ module PipefyMessage
             message_text: "Invalid provider specified: #{broker}"
           })
 
-          raise InvalidOption
+          # (this is actually not good and should eventually be
+          # refactored; we should have a "less manual" way of logging
+          # errors)
+          raise InvalidOption, "Invalid provider specified: #{broker}"
         end
 
         consumer_map = provider_map[:consumer]
@@ -80,7 +83,7 @@ module PipefyMessage
                       message_text: "Initializing and returning instance of #{broker} broker"
                     })
 
-                    consumer_map[:class_name].constantize.new(queue_name, @options_hash)
+        consumer_map[:class_name].constantize.new(queue_name, @options_hash)
       end
 
       ##
@@ -95,8 +98,10 @@ module PipefyMessage
         logger.info({ message_text: "Calling poller for #{broker} object" })
 
         build_instance_broker.poller do |message|
-          logger.info({ message_text: "Message received by #{broker} poller to be processed by worker",
-                        received_message: message })
+          logger.info({
+            message_text: "Message received by #{broker} poller to be processed by worker",
+            received_message: message
+            })
           obj.perform(message)
         end
       rescue Exception => e

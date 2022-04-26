@@ -9,7 +9,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SnsBroker do
       stub_const("ENV", ENV.to_hash.merge("AWS_CLI_STUB_RESPONSE" => "true"))
     end
     it "should return a message ID" do
-      @publisher = PipefyMessage::Providers::AwsClient::SnsBroker.new
+      @publisher = described_class.new
       mocked_return = { message_id: "5482c8be-db2c-44ec-a899-3aa52e424cc3",
                         sequence_number: nil }
 

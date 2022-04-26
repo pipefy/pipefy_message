@@ -32,7 +32,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       end
 
       it "should consume message" do
-        worker = PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
+        worker = described_class.new("my_queue")
         worker.instance_variable_set(:@poller, mocked_poller)
 
         result = nil
@@ -57,7 +57,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
           )
 
         expect do
-          PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
+          described_class.new("my_queue")
         end.to raise_error(PipefyMessage::Providers::Errors::ResourceError,
                            /The specified queue my_queue does not exist for this wsdl version/)
       end
@@ -73,7 +73,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
           )
 
         expect do
-          PipefyMessage::Providers::AwsClient::SqsBroker.new("my_queue")
+          described_class.new("my_queue")
         end.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
       end
     end

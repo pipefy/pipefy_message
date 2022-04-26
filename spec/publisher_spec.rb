@@ -18,11 +18,11 @@ RSpec.describe PipefyMessage::Publisher do
 
       allow(mocked_publisher_impl).to receive(:publish).and_return(mocked_return)
 
-      allow_any_instance_of(PipefyMessage::Publisher)
+      allow_any_instance_of(described_class)
         .to receive(:publisher_instance)
         .and_return(mocked_publisher_impl)
 
-      publisher = PipefyMessage::Publisher.new
+      publisher = described_class.new
 
       payload = { foo: "bar" }
       topic_name = "pipefy-local-topic"
@@ -32,7 +32,7 @@ RSpec.describe PipefyMessage::Publisher do
     end
 
     it "should choose the correct broker implementation" do
-      result = PipefyMessage::Publisher.new.send(:publisher_instance)
+      result = described_class.new.send(:publisher_instance)
       expected_impl = PipefyMessage::Providers::AwsClient::SnsBroker
 
       expect(result).to be_a expected_impl

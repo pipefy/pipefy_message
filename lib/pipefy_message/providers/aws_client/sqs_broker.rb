@@ -18,8 +18,8 @@ module PipefyMessage
         end
 
         ##
-        # Initiates SQS queue polling, with wait_time_seconds as given in
-        # the initial configuration.
+        # Initiates SQS queue polling, with wait_time_seconds as given
+        # in the initial configuration.
         def poller
           logger.debug({ message_text: "Initiating SQS polling..." })
 
