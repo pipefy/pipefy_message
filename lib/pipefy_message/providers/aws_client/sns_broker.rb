@@ -15,7 +15,7 @@ module PipefyMessage
           @sns = Aws::SNS::Resource.new
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
-        rescue Aws::SQS::Errors::NonExistentQueue, Seahorse::Client::NetworkingError => e
+        rescue Aws::SNS::Errors::ServiceError, Seahorse::Client::NetworkingError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
 
