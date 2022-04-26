@@ -72,7 +72,7 @@ module PipefyMessage
           # (this is actually not good and should eventually be
           # refactored; we should have a "less manual" way of logging
           # errors)
-          raise InvalidOption, "Invalid provider specified: #{broker}"
+          raise PipefyMessage::Providers::Errors::InvalidOption, "Invalid provider specified: #{broker}"
         end
 
         consumer_map = provider_map[:consumer]
