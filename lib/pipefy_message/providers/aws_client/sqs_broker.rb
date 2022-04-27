@@ -5,6 +5,7 @@ require_relative "aws_broker"
 module PipefyMessage
   module Providers
     module AwsClient
+      ##
       # AWS SQS client.
       class SqsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
         attr_reader :config
@@ -17,6 +18,16 @@ module PipefyMessage
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
+        end
+
+        ##
+        # Extends AWS default options to include a value
+        # for queue poller wait times.
+        def default_options
+          aws_defaults = super
+          aws_defaults[:wait_time_seconds] = 10
+
+          aws_defaults
         end
 
         ##

@@ -17,22 +17,23 @@ module PipefyMessage
         end
 
         ##
-        # Hash with default options to be used in AWS access configuration
-        # if no overriding parameters are provided.
+        # Hash with default options to be used in AWS access
+        # configuration if no overriding parameters are provided.
         def default_options
           {
             access_key_id: (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
             secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
             endpoint: (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
             region: (ENV["AWS_REGION"] || "us-east-1"),
-            stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] == "true"),
-            wait_time_seconds: 10
+            stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] == "true")
           }
         end
 
         ##
-        # Merges default options (returned by default_options) with the
-        # hash provided as an argument. The latter takes precedence.
+        # Moves AWS configuration options into a subhash, separate
+        # from any other options passed to child classes. Also
+        # merges default options (returned by default_options) with the
+        # hash provided as an argument; the latter takes precedence.
         def build_options(opts)
           hash = default_options.merge(opts)
           aws_hash = isolate_broker_arguments(hash)
@@ -51,7 +52,7 @@ module PipefyMessage
         private
 
         ##
-        # Options hash parser.
+        # AWS option hash parser.
         def isolate_broker_arguments(hash)
           {
             access_key_id: hash[:access_key_id],
