@@ -4,15 +4,30 @@ module PipefyMessage
   module Providers
     ##
     # Provides higher-level error classes that can be used for
-    # handling similar error thrown by different providers, as well
+    # handling similar errors thrown by different providers, as well
     # as common error messages.
     module Errors
+
+      ##
+      # When included in an Exception class, automatically logs every
+      # time an instance is raised.
+      module LoggingError
+        prepend PipefyMessage::Logging
+
+        def initialize(msg = nil)
+          super
+          logger.error({
+                         error_class: self.class,
+                         error_message: message,
+                         stack_trace: full_message
+                       })
+        end
+      end
+
       ##
       # Abstraction for service and networking errors.
       class ResourceError < RuntimeError
-        def initialize(msg = "ResourceError")
-          super
-        end
+        prepend PipefyMessage::Providers::Errors::LoggingError
       end
 
       ##
@@ -20,9 +35,7 @@ module PipefyMessage
       # to a method call (eg: if a queueing service client is
       # initialized with an invalid queue identifier).
       class InvalidOption < ArgumentError
-        def initialize(msg = "InvalidOption")
-          super
-        end
+        prepend PipefyMessage::Providers::Errors::LoggingError
       end
 
       # Error messages:

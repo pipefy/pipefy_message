@@ -67,14 +67,7 @@ module PipefyMessage
 
         if provider_map.nil?
           error_msg = "Invalid provider specified: #{broker}"
-          logger.error({
-                         invalid_provider: broker,
-                         message_text: error_msg
-                       })
 
-          # (this is actually not good and should eventually be
-          # refactored; we should have a "less manual" way of logging
-          # errors)
           raise PipefyMessage::Providers::Errors::InvalidOption, error_msg
         end
 

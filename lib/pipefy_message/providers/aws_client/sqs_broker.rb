@@ -15,7 +15,7 @@ module PipefyMessage
           @sqs = Aws::SQS::Client.new
           queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
-        rescue Aws::SQS::Errors::NonExistentQueue, Seahorse::Client::NetworkingError => e
+        rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
 

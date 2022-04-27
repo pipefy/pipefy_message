@@ -42,8 +42,6 @@ module PipefyMessage
         level: severity.to_s,
         app: progname.to_s,
         context: "async_processing",
-        calling_obj: obj.to_s,
-        calling_obj_class: obj.class.to_s,
         message: msg }
     end
 
