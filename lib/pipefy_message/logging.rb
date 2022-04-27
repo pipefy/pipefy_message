@@ -37,7 +37,7 @@ module PipefyMessage
     # Formats logger output as a JSON object, including information on
     # the calling object. Should not be called directly; this method is
     # called implicitly whenever a logger method is called.
-    def self.json_output(obj, severity, datetime, progname, msg)
+    def self.json_output(_obj, severity, datetime, progname, msg)
       { date: datetime.to_s,
         level: severity.to_s,
         app: progname.to_s,

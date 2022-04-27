@@ -7,7 +7,6 @@ module PipefyMessage
     # handling similar errors thrown by different providers, as well
     # as common error messages.
     module Errors
-
       ##
       # When included in an Exception class, automatically logs every
       # time an instance is raised.
