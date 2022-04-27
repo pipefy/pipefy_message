@@ -3,6 +3,7 @@
 require "singleton"
 require "benchmark"
 require_relative "providers/errors"
+require_relative "providers/broker_resolver"
 
 module PipefyMessage
   ##
@@ -63,7 +64,7 @@ module PipefyMessage
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
-        provider_map = PipefyMessage.class_path[broker.to_sym]
+        provider_map = PipefyMessage::Providers::BrokerResolver.class_path[broker.to_sym]
 
         if provider_map.nil?
           error_msg = "Invalid provider specified: #{broker}"
