@@ -59,12 +59,6 @@ module PipefyMessage
                      })
       end
 
-      # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
-      # (The methods below are long because of logger calls and the
-      # rescue block. I don't feel those are necessarily issues to be
-      # refactored -- thought maybe we _could_ handle that better.
-      # Thoughts?)
-
       ##
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
@@ -128,6 +122,5 @@ module PipefyMessage
                     })
       end
     end
-    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
   end
 end

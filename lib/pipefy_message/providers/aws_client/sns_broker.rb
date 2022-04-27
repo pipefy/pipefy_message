@@ -20,12 +20,6 @@ module PipefyMessage
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
 
-        # rubocop:disable Metrics/MethodLength
-        # (The method below is long because of logger calls and the
-        # rescue block. I don't feel those are necessarily issues to be
-        # refactored -- thought maybe we _could_ handle that better.
-        # Thoughts?)
-
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
@@ -56,7 +50,6 @@ module PipefyMessage
               error_details: e.inspect }
           )
         end
-        # rubocop:enable Metrics/MethodLength
 
         private
 

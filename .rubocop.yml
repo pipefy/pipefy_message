@@ -25,5 +25,10 @@ Style/GlobalVars:
     # Thoughts?
 
 Lint/MissingSuper:
-  Exclude:
-    - "/**/*"
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
