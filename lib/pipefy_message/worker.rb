@@ -2,6 +2,7 @@
 
 require "singleton"
 require "benchmark"
+require_relative "providers/errors"
 
 module PipefyMessage
   ##
@@ -11,6 +12,7 @@ module PipefyMessage
   # processing received messages.
   module Worker
     include PipefyMessage::Logging
+    include PipefyMessage::Providers::Errors
     ##
     # Default options for consumer setup.
     def self.default_worker_options
@@ -33,8 +35,8 @@ module PipefyMessage
     # messages received by the poller. Called by process_message from
     # an instance of the including class.
     def perform(_message)
-      raise NotImplementedError,
-            "Method #{__method__} should be implemented by classes including #{method(__method__).owner}"
+      error_msg = includer_should_implement(__method__)
+      raise NotImplementedError, error_msg
     end
 
     ##
@@ -57,6 +59,12 @@ module PipefyMessage
                      })
       end
 
+      # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
+      # (The methods below are long because of logger calls and the
+      # rescue block. I don't feel those are necessarily issues to be
+      # refactored -- thought maybe we _could_ handle that better.
+      # Thoughts?)
+
       ##
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
@@ -64,15 +72,16 @@ module PipefyMessage
         provider_map = PipefyMessage.class_path[broker.to_sym]
 
         if provider_map.nil?
+          error_msg = "Invalid provider specified: #{broker}"
           logger.error({
-            invalid_provider: broker,
-            message_text: "Invalid provider specified: #{broker}"
-          })
+                         invalid_provider: broker,
+                         message_text: error_msg
+                       })
 
           # (this is actually not good and should eventually be
           # refactored; we should have a "less manual" way of logging
           # errors)
-          raise PipefyMessage::Providers::Errors::InvalidOption, "Invalid provider specified: #{broker}"
+          raise PipefyMessage::Providers::Errors::InvalidOption, error_msg
         end
 
         consumer_map = provider_map[:consumer]
@@ -95,13 +104,16 @@ module PipefyMessage
       def process_message
         start = Time.now
         obj = new
-        logger.info({ message_text: "Calling poller for #{broker} object" })
+        logger.info({
+                      message_text: "Calling poller for #{broker} object"
+                    })
 
         build_instance_broker.poller do |message|
           logger.info({
-            message_text: "Message received by #{broker} poller to be processed by worker",
-            received_message: message
-            })
+                        message_text: "Message received by #{broker}
+                        poller to be processed by worker",
+                        received_message: message
+                      })
           obj.perform(message)
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e # (any others?)
@@ -110,9 +122,12 @@ module PipefyMessage
         elapsed_time = (Time.now - start) * 1000.0
         logger.info({
                       duration_seconds: elapsed_time,
-                      message_text: "Message received by #{broker} poller processed by #{name} worker in #{elapsed_time} seconds"
+                      message_text: "Message received by #{broker}
+                       poller processed by #{name} worker in
+                       #{elapsed_time} seconds"
                     })
       end
     end
+    # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
   end
 end

@@ -16,6 +16,14 @@ Layout/LineLength:
 Metrics/BlockLength:
   IgnoredMethods: ["describe", "context"]
 
+Style/GlobalVars:
+  Exclude:
+    - "spec/worker_spec.rb"
+    # The introduction of a dummy global variable greatly simplified
+    # testing in this case, as it made reassignment between scopes much
+    # more straightforward. I didn't consider that particularly harmful.
+    # Thoughts?
+
 Lint/MissingSuper:
   Exclude:
     - "/**/*"

@@ -1,16 +1,22 @@
+# frozen_string_literal: true
+
 module PipefyMessage
   module Providers
     # Provides a provider-agnostic, higher level abstraction for
-    # objects that provide pollers. Should be included in classes implemented for specific providers. Used by the Worker module.
+    # objects that provide pollers. Should be included in classes
+    # implemented for specific providers. Used by the Worker module.
     class Broker
       include PipefyMessage::Logging
+      include PipefyMessage::Providers::Errors
 
       def poller
-        raise NotImplementedError, "Method #{__method__} should be implemented by classes including #{method(__method__).owner}"
+        error_msg = includer_should_implement(__method__)
+        raise NotImplementedError, error_msg
       end
 
-      def publish(payload, topic_name)
-        raise NotImplementedError, "Method #{__method__} should be implemented by classes including #{method(__method__).owner}"
+      def publish(_payload, _topic_name)
+        error_msg = includer_should_implement(__method__)
+        raise NotImplementedError, error_msg
       end
 
       def default_options

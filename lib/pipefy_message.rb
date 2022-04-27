@@ -17,6 +17,8 @@ require "active_support/core_ext/string/inflections"
 # PipefyMessage abstraction async process
 ##
 module PipefyMessage
+  # rubocop:disable Metrics/MethodLength
+  # (This method is long because it's essentially storing information.)
   def self.class_path
     {
       aws: {
@@ -31,4 +33,5 @@ module PipefyMessage
       }
     }
   end
+  # rubocop:enable Metrics/MethodLength
 end
