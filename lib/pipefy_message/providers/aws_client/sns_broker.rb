@@ -6,6 +6,7 @@ require_relative "aws_broker"
 module PipefyMessage
   module Providers
     module AwsClient
+      ##
       # AWS SNS client.
       class SnsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
         attr_reader :config
@@ -14,10 +15,22 @@ module PipefyMessage
           super(opts)
 
           @sns = Aws::SNS::Resource.new
+          logger.debug({ message_text: "SNS resource created" })
+
           @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         rescue StandardError
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
+        end
+
+        ##
+        # Extends AWS default options to include a value
+        # for SNS-specific configurations.
+        def default_options
+          aws_defaults = super
+          aws_defaults[:default_arn_prefix] = "arn:aws:sns:us-east-1:000000000000"
+
+          aws_defaults
         end
 
         ##

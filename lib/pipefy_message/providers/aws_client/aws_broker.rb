@@ -2,6 +2,7 @@
 
 require "aws-sdk-sqs"
 require "json"
+require "active_support/core_ext" # Hash#except
 
 module PipefyMessage
   module Providers
@@ -11,9 +12,13 @@ module PipefyMessage
       # AWS option parsing and connection setup.
       class AwsBroker < PipefyMessage::Providers::Broker
         def initialize(opts = {})
-          @config = build_options(opts)
-          Aws.config.update(@config[:aws])
-          logger.debug({ options_set: @config, message_text: "AWS connection set up with options_set" })
+          config = build_options(opts)
+          Aws.config.update(config[:aws])
+
+          @config = config.except(:aws).except(:broker)
+          # Stores any child class-specific option passed,
+          # but not the AWS connection configuration (most
+          # importantly: not the secret key).
         end
 
         ##

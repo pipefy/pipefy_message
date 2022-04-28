@@ -18,8 +18,7 @@ module PipefyMessage
     # Default options for consumer setup.
     def self.default_worker_options
       @default_worker_options ||= {
-        "broker" => "aws",
-        "queue_name" => "my_queue"
+        broker: "aws"
       }
     end
 
@@ -48,7 +47,7 @@ module PipefyMessage
       # Merges default worker options with the hash passed as
       # an argument. The latter takes precedence.
       def pipefymessage_options(opts = {})
-        @options_hash = Worker.default_worker_options.merge(opts.transform_keys(&:to_s))
+        @options_hash = Worker.default_worker_options.merge(opts)
         @options_hash.each do |k, v|
           singleton_class.class_eval { attr_accessor k }
           send("#{k}=", v)
@@ -80,7 +79,7 @@ module PipefyMessage
                       message_text: "Initializing and returning instance of #{broker} broker"
                     })
 
-        consumer_map[:class_name].constantize.new(queue_name, @options_hash)
+        consumer_map[:class_name].constantize.new(@options_hash)
       end
 
       ##

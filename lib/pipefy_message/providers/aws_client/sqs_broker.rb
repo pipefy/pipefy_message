@@ -10,11 +10,13 @@ module PipefyMessage
       class SqsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
         attr_reader :config
 
-        def initialize(queue_name, opts = {})
+        def initialize(opts = {})
           super(opts)
 
           @sqs = Aws::SQS::Client.new
-          queue_url = @sqs.get_queue_url({ queue_name: queue_name }).queue_url
+          logger.debug({ message_text: "SQS client created" })
+
+          queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
@@ -22,10 +24,11 @@ module PipefyMessage
 
         ##
         # Extends AWS default options to include a value
-        # for queue poller wait times.
+        # for SQS-specific configurations.
         def default_options
           aws_defaults = super
           aws_defaults[:wait_time_seconds] = 10
+          aws_defaults[:queue_name] = "my_queue"
 
           aws_defaults
         end
