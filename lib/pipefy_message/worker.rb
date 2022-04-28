@@ -109,10 +109,10 @@ module PipefyMessage
       ensure
         elapsed_time = (Time.now - start) * 1000.0
         logger.info({
-                      duration_seconds: elapsed_time,
+                      duration_ms: elapsed_time,
                       message_text: "Message received by #{broker}
                        poller processed by #{name} worker in
-                       #{elapsed_time} seconds"
+                       #{elapsed_time} milliseconds"
                     })
       end
     end
