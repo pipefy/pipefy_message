@@ -28,7 +28,7 @@ module PipefyMessage
         def default_options
           aws_defaults = super
           aws_defaults[:wait_time_seconds] = 10
-          aws_defaults[:queue_name] = "my_queue"
+          aws_defaults[:queue_name] = "pipefy-local-queue"
 
           aws_defaults
         end
@@ -37,12 +37,23 @@ module PipefyMessage
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.debug({ message_text: "Initiating SQS polling..." })
+          logger.debug(build_log_hash("Initiating SQS polling on queue #{@config[:queue_name]}"))
 
           @poller.poll(wait_time_seconds: @config[:wait_time_seconds]) do |received_message|
-            logger.debug({ message_text: "Message received by SQS poller" })
+            logger.debug(build_log_hash("Message received by SQS poller on queue #{@config[:queue_name]}"))
+
             payload = JSON.parse(received_message.body)
             yield(payload)
+          end
+        end
+
+        ##
+        # Adds the queue name to logs, if not already present.
+        def build_log_hash(arg)
+          if arg.instance_of? Hash
+            { queue_name: @config[:queue_name] }.merge(arg)
+          else
+            { queue_name: @config[:queue_name], message_text: arg }
           end
         end
       end
