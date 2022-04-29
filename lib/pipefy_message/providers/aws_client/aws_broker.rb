@@ -26,11 +26,11 @@ module PipefyMessage
         # configuration if no overriding parameters are provided.
         def default_options
           {
-            access_key_id: (ENV["AWS_ACCESS_KEY_ID"] || "foo"),
-            secret_access_key: (ENV["AWS_SECRET_ACCESS_KEY"] || "bar"),
-            endpoint: (ENV["AWS_ENDPOINT"] || "http://localhost:4566"),
-            region: (ENV["AWS_REGION"] || "us-east-1"),
-            stub_responses: (ENV["AWS_CLI_STUB_RESPONSE"] == "true")
+            access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID", "foo"),
+            secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY", "bar"),
+            endpoint: ENV.fetch("AWS_ENDPOINT", "http://localhost:4566"),
+            region: ENV.fetch("AWS_REGION", "us-east-1"),
+            stub_responses: ENV.fetch("AWS_CLI_STUB_RESPONSE", "true")
           }
         end
 
@@ -57,7 +57,8 @@ module PipefyMessage
         private
 
         ##
-        # AWS option hash parser.
+        # Extracts AWS-level options from a hash that may also contain
+        # configurations related to child class-specific services.
         def isolate_broker_arguments(hash)
           {
             access_key_id: hash[:access_key_id],

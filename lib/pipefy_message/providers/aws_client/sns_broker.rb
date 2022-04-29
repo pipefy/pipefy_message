@@ -27,10 +27,7 @@ module PipefyMessage
         # Extends AWS default options to include a value
         # for SNS-specific configurations.
         def default_options
-          aws_defaults = super
-          aws_defaults[:default_arn_prefix] = "arn:aws:sns:us-east-1:000000000000"
-
-          aws_defaults
+          super.merge(default_arn_prefix: "arn:aws:sns:us-east-1:000000000000")
         end
 
         ##

@@ -15,6 +15,8 @@ module PipefyMessage
   #
   # (see https://stackoverflow.com/questions/917566/ruby-share-logger-instance-among-module-classes)
   module Logging
+    LOG_LEVELS = %w[DEBUG INFO WARN ERROR FATAL UNKNOWN].freeze
+
     ##
     # Creates a logger object if it has not yet been instantiated,
     # or returns the existing object.
@@ -25,21 +27,17 @@ module PipefyMessage
     ##
     # Configuration for a logger created by the Ruby logger gem.
     def self.logger_setup
-      loglevels = %w[DEBUG INFO WARN ERROR FATAL UNKNOWN].freeze
-      logger = Logger.new($stdout)
-      level ||= loglevels.index ENV.fetch("ASYNC_LOG_LEVEL", "INFO")
-      level ||= Logger::ERROR
-      logger.level = level
+      Logger.new($stdout).tap do |logger|
+        logger.level = LOG_LEVELS.index(ENV.fetch("ASYNC_LOG_LEVEL", "INFO")) || Logger::ERROR
 
-      logger.formatter = proc do |severity, datetime, progname, msg|
-        { date: datetime.to_s,
-          level: severity.to_s,
-          app: progname.to_s,
-          context: "async_processing",
-          message: msg }.to_json + $INPUT_RECORD_SEPARATOR.to_s
+        logger.formatter = proc do |severity, datetime, progname, msg|
+          { date: datetime.to_s,
+            level: severity.to_s,
+            app: progname.to_s,
+            context: "async_processing",
+            message: msg }.to_json + $INPUT_RECORD_SEPARATOR.to_s
+        end
       end
-
-      logger
     end
 
     ##

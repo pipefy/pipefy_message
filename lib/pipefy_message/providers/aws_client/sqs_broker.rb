@@ -26,11 +26,7 @@ module PipefyMessage
         # Extends AWS default options to include a value
         # for SQS-specific configurations.
         def default_options
-          aws_defaults = super
-          aws_defaults[:wait_time_seconds] = 10
-          aws_defaults[:queue_name] = "pipefy-local-queue"
-
-          aws_defaults
+          super.merge(wait_time_seconds: 10, queue_name: "pipefy-local-queue")
         end
 
         ##
