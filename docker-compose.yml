@@ -24,7 +24,7 @@ services:
     command: >
       "
         # Wait for localstack boot
-        sleep 10
+        sleep 30
 
         # Creating SNS Topics
         aws --endpoint-url=http://localstack:4566 sns create-topic --name pipefy-local-topic
