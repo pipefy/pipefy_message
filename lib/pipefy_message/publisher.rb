@@ -34,7 +34,7 @@ module PipefyMessage
 
       logger.info({
                     broker: @broker,
-                    message_text: "Initializing and returning instance of #{@broker} broker"
+                    message_text: "Initializing instance of #{@broker} broker"
                   })
 
       publisher_map[:class_name].constantize.new

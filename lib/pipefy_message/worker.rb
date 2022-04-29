@@ -76,7 +76,7 @@ module PipefyMessage
 
         logger.info({
                       broker: broker,
-                      message_text: "Initializing and returning instance of #{broker} broker"
+                      message_text: "Initializing instance of #{broker} broker"
                     })
 
         consumer_map[:class_name].constantize.new(@options_hash)
@@ -97,8 +97,7 @@ module PipefyMessage
 
         build_instance_broker.poller do |message|
           logger.info({
-                        message_text: "Message received by #{broker}
-                        poller to be processed by worker",
+                        message_text: "Message received by #{broker} poller to be processed by worker",
                         received_message: message
                       })
           obj.perform(message)
@@ -109,9 +108,9 @@ module PipefyMessage
         elapsed_time = (Time.now - start) * 1000.0
         logger.info({
                       duration_ms: elapsed_time,
-                      message_text: "Message received by #{broker}
-                       poller processed by #{name} worker in
-                       #{elapsed_time} milliseconds"
+                      message_text: "Message received by #{broker}" \
+                                    "poller processed by #{name} worker" \
+                                    "in #{elapsed_time} milliseconds"
                     })
       end
     end
