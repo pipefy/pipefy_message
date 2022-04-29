@@ -48,7 +48,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       it "QueueNonExistError" do
         allow_any_instance_of(Aws::SQS::Client)
           .to receive(:get_queue_url)
-          .with({ queue_name: "my_queue" })
+          .with({ queue_name: "pipefy-local-queue" })
           .and_raise(
             Aws::SQS::Errors::NonExistentQueue.new(
               double(Aws::SQS::Client),
@@ -64,7 +64,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       it "NetworkingError" do
         allow_any_instance_of(Aws::SQS::Client)
           .to receive(:get_queue_url)
-          .with({ queue_name: "my_queue" })
+          .with({ queue_name: "pipefy-local-queue" })
           .and_raise(
             Seahorse::Client::NetworkingError.new(
               Errno::ECONNREFUSED.new(""),
