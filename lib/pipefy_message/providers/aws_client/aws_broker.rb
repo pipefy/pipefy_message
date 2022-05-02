@@ -6,68 +6,33 @@ require "active_support/core_ext" # Hash#except
 
 module PipefyMessage
   module Providers
+    ##
+    # Provides an AWS connection configuration "lazy loader" and classes
+    # for AWS service brokers.
     module AwsClient
+      include PipefyMessage::Logging
+
       ##
-      # "Abstract" superclass for brokers of AWS services, implementing
-      # AWS option parsing and connection setup.
-      class AwsBroker < PipefyMessage::Providers::Broker
-        def initialize(opts = {})
-          config = build_options(opts)
-          Aws.config.update(config[:aws])
+      # Hash that fetches AWS options from environment variables or
+      # sets them to default values.
+      def self.set_options
+        {
+          access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID", "foo"),
+          secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY", "bar"),
+          endpoint: ENV.fetch("AWS_ENDPOINT", "http://localhost:4566"),
+          region: ENV.fetch("AWS_REGION", "us-east-1"),
+          stub_responses: ENV.fetch("AWS_CLI_STUB_RESPONSE", "true")
+        }
+      end
 
-          @config = config.except(:aws).except(:broker)
-          # Stores any child class-specific option passed,
-          # but not the AWS connection configuration (most
-          # importantly: not the secret key).
-        end
+      ##
+      # Sets up AWS options the first time an AWS service is used.
+      def self.aws_setup
+        return unless Aws.config.empty?
 
-        ##
-        # Hash with default options to be used in AWS access
-        # configuration if no overriding parameters are provided.
-        def default_options
-          {
-            access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID", "foo"),
-            secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY", "bar"),
-            endpoint: ENV.fetch("AWS_ENDPOINT", "http://localhost:4566"),
-            region: ENV.fetch("AWS_REGION", "us-east-1"),
-            stub_responses: ENV.fetch("AWS_CLI_STUB_RESPONSE", "true")
-          }
-        end
+        logger.info({ message_text: "AWS configurations set" })
 
-        ##
-        # Moves AWS configuration options into a subhash, separate
-        # from any other options passed to child classes. Also
-        # merges default options (returned by default_options) with the
-        # hash provided as an argument; the latter takes precedence.
-        def build_options(opts)
-          hash = default_options.merge(opts)
-          aws_hash = isolate_broker_arguments(hash)
-
-          config_hash = {
-            aws: aws_hash
-          }
-
-          hash.each do |k, v|
-            config_hash[k] = v unless aws_hash.key?(k)
-          end
-
-          config_hash
-        end
-
-        private
-
-        ##
-        # Extracts AWS-level options from a hash that may also contain
-        # configurations related to child class-specific services.
-        def isolate_broker_arguments(hash)
-          {
-            access_key_id: hash[:access_key_id],
-            secret_access_key: hash[:secret_access_key],
-            endpoint: hash[:endpoint],
-            region: hash[:region],
-            stub_responses: hash[:stub_responses]
-          }
-        end
+        Aws.config.update(set_options)
       end
     end
   end

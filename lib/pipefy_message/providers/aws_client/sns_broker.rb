@@ -8,11 +8,16 @@ module PipefyMessage
     module AwsClient
       ##
       # AWS SNS client.
-      class SnsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
+      class SnsBroker
+        include PipefyMessage::Logging
+        include PipefyMessage::Providers::Errors
+
         attr_reader :config
 
         def initialize(opts = {})
-          super(opts)
+          @config = default_options.merge(opts)
+
+          AwsClient.aws_setup
 
           @sns = Aws::SNS::Resource.new
           logger.debug({ message_text: "SNS resource created" })
@@ -27,7 +32,7 @@ module PipefyMessage
         # Extends AWS default options to include a value
         # for SNS-specific configurations.
         def default_options
-          super.merge(default_arn_prefix: "arn:aws:sns:us-east-1:000000000000")
+          { default_arn_prefix: "arn:aws:sns:us-east-1:000000000000" }
         end
 
         ##

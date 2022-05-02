@@ -7,11 +7,16 @@ module PipefyMessage
     module AwsClient
       ##
       # AWS SQS client.
-      class SqsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
+      class SqsBroker
+        include PipefyMessage::Logging
+        include PipefyMessage::Providers::Errors
+
         attr_reader :config
 
         def initialize(opts = {})
-          super(opts)
+          @config = default_options.merge(opts)
+
+          AwsClient.aws_setup
 
           @sqs = Aws::SQS::Client.new
           logger.debug({ message_text: "SQS client created" })
@@ -26,7 +31,7 @@ module PipefyMessage
         # Extends AWS default options to include a value
         # for SQS-specific configurations.
         def default_options
-          super.merge(wait_time_seconds: 10, queue_name: "pipefy-local-queue")
+          { wait_time_seconds: 10, queue_name: "pipefy-local-queue" }
         end
 
         ##
