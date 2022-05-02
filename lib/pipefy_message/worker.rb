@@ -47,22 +47,33 @@ module PipefyMessage
       # Merges default worker options with the hash passed as
       # an argument. The latter takes precedence.
       def pipefymessage_options(opts = {})
-        @options_hash = Worker.default_worker_options.merge(opts)
-        @options_hash.each do |k, v|
+        @pipefymessage_options = Worker.default_worker_options.merge(opts)
+        @pipefymessage_options.each do |k, v|
           singleton_class.class_eval { attr_accessor k }
           send("#{k}=", v)
         end
 
         logger.debug({
-                       options_set: @options_hash,
+                       options_set: @pipefymessage_options,
                        message_text: "Set #{name} options to options_set"
                      })
+      end
+
+      ##
+      # Sets broker-specific options to be passed to the broker's
+      # constructor.
+      def pipefymessage_broker_options(opts = {})
+        @pipefymessage_broker_opts = opts
       end
 
       ##
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_instance_broker
+        pipefymessage_options if @broker.nil?
+
+        pipefymessage_broker_options if @pipefymessage_broker_opts.nil?
+
         provider_map = PipefyMessage::Providers::BrokerResolver.class_path[broker.to_sym]
 
         if provider_map.nil?
@@ -76,10 +87,10 @@ module PipefyMessage
 
         logger.info({
                       broker: broker,
-                      message_text: "Initializing instance of #{broker} broker"
+                      message_text: "Initializing instance of #{broker} consumer"
                     })
 
-        consumer_map[:class_name].constantize.new(@options_hash)
+        consumer_map[:class_name].constantize.new(@pipefymessage_broker_opts)
       end
 
       ##

@@ -7,8 +7,9 @@ module PipefyMessage
   class Publisher
     include PipefyMessage::Logging
 
-    def initialize(broker = "aws")
+    def initialize(broker = "aws", broker_opts = {})
       @broker = broker
+      @broker_opts = broker_opts
     end
 
     def publish(message, topic)
@@ -34,10 +35,10 @@ module PipefyMessage
 
       logger.info({
                     broker: @broker,
-                    message_text: "Initializing instance of #{@broker} broker"
+                    message_text: "Initializing instance of #{@broker} publisher"
                   })
 
-      publisher_map[:class_name].constantize.new
+      publisher_map[:class_name].constantize.new(@broker_opts)
     end
   end
 end
