@@ -2,13 +2,13 @@
 
 $result =~ nil
 
-class MockBroker < PipefyMessage::Providers::Broker
+class MockBroker
   def poller
     yield("test")
   end
 end
 
-class MockBrokerFail < PipefyMessage::Providers::Broker
+class MockBrokerFail
   def poller
     raise PipefyMessage::Providers::Errors::ResourceError
   end
