@@ -12,27 +12,16 @@ module PipefyMessage
         include PipefyMessage::Logging
         include PipefyMessage::Providers::Errors
 
-        attr_reader :config, :topic_arn_prefix
-
-        def initialize(opts = {})
-          @config = default_options.merge(opts)
-
+        def initialize(_opts = {})
           AwsClient.aws_setup
 
           @sns = Aws::SNS::Resource.new
           logger.debug({ message_text: "SNS resource created" })
 
-          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]
+          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || "arn:aws:sns:us-east-1:000000000000:"
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         rescue StandardError
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
-        end
-
-        ##
-        # Extends AWS default options to include a value
-        # for SNS-specific configurations.
-        def default_options
-          { default_arn_prefix: "arn:aws:sns:us-east-1:000000000000" }
         end
 
         ##
@@ -40,10 +29,8 @@ module PipefyMessage
         # with topic_name.
         def publish(payload, topic_name)
           message = prepare_payload(payload)
-          topic_arn = @topic_arn_prefix + ":" + (@is_staging ? "#{topic_name}-staging" : topic_name)
+          topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
-
-          # require "pry"; binding.pry
 
           logger.info(
             { topic_arn: topic_arn,

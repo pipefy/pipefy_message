@@ -5,8 +5,8 @@ require "pipefy_message"
 ##
 # Example worker class.
 class TestWorker
-  include PipefyMessage::Worker
-  pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
+  include PipefyMessage::Consumer
+  options broker: "aws", queue_name: "pipefy-local-queue"
 
   def perform(message)
     puts message

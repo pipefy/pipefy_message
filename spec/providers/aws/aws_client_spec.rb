@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "aws-sdk-sqs"
 
 require_relative "../../../lib/pipefy_message/providers/aws_client/aws_client"

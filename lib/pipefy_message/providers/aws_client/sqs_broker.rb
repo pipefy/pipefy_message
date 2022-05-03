@@ -11,29 +11,21 @@ module PipefyMessage
         include PipefyMessage::Logging
         include PipefyMessage::Providers::Errors
 
-        attr_reader :config
-
         def initialize(opts = {})
           @config = default_options.merge(opts)
 
           AwsClient.aws_setup
 
-          # require "pry"; binding.pry
-
           @sqs = Aws::SQS::Client.new
           logger.debug({ message_text: "SQS client created" })
+
+          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || "arn:aws:sns:us-east-1:000000000000"
+          @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
           queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
-        end
-
-        ##
-        # Extends AWS default options to include a value
-        # for SQS-specific configurations.
-        def default_options
-          { wait_time_seconds: 10, queue_name: "pipefy-local-queue" }
         end
 
         ##
@@ -50,14 +42,19 @@ module PipefyMessage
           end
         end
 
+        private
+
+        ##
+        # Extends AWS default options to include a value
+        # for SQS-specific configurations.
+        def default_options
+          { wait_time_seconds: 10, queue_name: "pipefy-local-queue" }
+        end
+
         ##
         # Adds the queue name to logs, if not already present.
         def build_log_hash(arg)
-          if arg.instance_of? Hash
-            { queue_name: @config[:queue_name] }.merge(arg)
-          else
-            { queue_name: @config[:queue_name], message_text: arg }
-          end
+          { queue_name: @config[:queue_name], message_text: arg }
         end
       end
     end

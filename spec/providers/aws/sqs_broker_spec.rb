@@ -27,12 +27,11 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   describe "#poller" do
     it "should consume a message" do
       mocked_message = { message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
-        receipt_handle: "2312dasdas1231221312321adsads",
-        body: "{\"Message\": {\"foo\": \"bar\"}}" }
-
+                         receipt_handle: "2312dasdas1231221312321adsads",
+                         body: "{\"Message\": {\"foo\": \"bar\"}}" }
 
       mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
-                                    { skip_delete: true })
+                                                { skip_delete: true })
       mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
 
       mocked_element = Aws::SQS::Types::Message.new(mocked_message)
@@ -67,7 +66,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       expect do
         described_class.new
       end.to raise_error(PipefyMessage::Providers::Errors::ResourceError,
-                          /The specified queue my_queue does not exist for this wsdl version/)
+                         /The specified queue my_queue does not exist for this wsdl version/)
     end
     it "should raise NetworkingError" do
       allow_any_instance_of(Aws::SQS::Client)
