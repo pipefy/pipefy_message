@@ -9,8 +9,8 @@ module PipefyMessage
       ##
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
-      def self.resolve_broker(broker, type)
-        provider_map = class_path[broker.to_sym]
+      def resolve_broker(broker, type)
+        provider_map = PipefyMessage::Providers::BrokerResolver.class_path[broker.to_sym]
 
         if provider_map.nil?
           error_msg = "Invalid provider specified: #{broker}"
@@ -18,7 +18,7 @@ module PipefyMessage
           raise PipefyMessage::Providers::Errors::InvalidOption, error_msg
         end
 
-        map = provider_map[:type]
+        map = provider_map[type.to_sym]
         require_relative map[:relative_path]
 
         logger.info({
@@ -34,11 +34,11 @@ module PipefyMessage
           aws: {
             publisher: {
               class_name: "PipefyMessage::Providers::AwsClient::SnsBroker",
-              relative_path: "providers/aws_client/sns_broker"
+              relative_path: "aws_client/sns_broker"
             },
             consumer: {
               class_name: "PipefyMessage::Providers::AwsClient::SqsBroker",
-              relative_path: "providers/aws_client/sqs_broker"
+              relative_path: "aws_client/sqs_broker"
             }
           }
         }

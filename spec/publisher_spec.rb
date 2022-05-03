@@ -12,7 +12,7 @@ RSpec.describe PipefyMessage::Publisher do
     allow(test_broker).to receive(:publish)
 
     allow_any_instance_of(described_class)
-      .to receive(:publisher_instance)
+      .to receive(:build_publisher_instance)
       .and_return(test_broker)
 
     publisher = described_class.new
@@ -37,7 +37,7 @@ RSpec.describe PipefyMessage::Publisher do
       stub_const("ENV", ENV.to_hash.merge(changed_opts))
     end
     it "should choose the correct broker implementation" do
-      result = described_class.new.send(:publisher_instance)
+      result = described_class.new.send(:build_publisher_instance)
       expected_impl = PipefyMessage::Providers::AwsClient::SnsBroker
 
       expect(result).to be_a expected_impl
@@ -51,7 +51,7 @@ RSpec.describe PipefyMessage::Publisher do
       allow(mocked_publisher_impl).to receive(:publish).and_return(mocked_return)
 
       allow_any_instance_of(described_class)
-        .to receive(:publisher_instance)
+        .to receive(:build_publisher_instance)
         .and_return(mocked_publisher_impl)
 
       publisher = described_class.new

@@ -6,6 +6,7 @@ module PipefyMessage
   # Base Publisher provided by this gem, to be used for the external publishers to send messages to a broker
   class Publisher
     include PipefyMessage::Logging
+    include PipefyMessage::Providers::BrokerResolver
 
     def initialize(broker = "aws", broker_opts = {})
       @broker = broker

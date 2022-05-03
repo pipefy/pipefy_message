@@ -8,30 +8,18 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SnsBroker do
     let(:prefix) { "test" }
     let(:env_prefix) { "env" }
 
-    it "should set the default ARN prefix from a hash arg" do
-      sns_broker = described_class.new({ default_arn_prefix: prefix })
-      default_prefix = sns_broker.config[:default_arn_prefix]
-
-      expect(default_prefix).to eq prefix
-      expect(sns_broker.topic_arn_prefix).to eq default_prefix
-    end
-
-    it "should have a default default ARN prefix" do
+    it "should have a default ARN prefix" do
       sns_broker = described_class.new
 
-      default_prefix = sns_broker.config[:default_arn_prefix]
-
-      expect(default_prefix).to_not eq nil
-      expect(sns_broker.topic_arn_prefix).to eq default_prefix
+      expect(sns_broker.instance_variable_get(:@topic_arn_prefix)).to_not eq nil
     end
 
-    it "should use a nondefault ARN prefix from an env var" do
+    it "should set a nondefault ARN prefix from an env var" do
       stub_const("ENV", ENV.to_hash.merge({ "AWS_SNS_ARN_PREFIX" => env_prefix }))
 
       sns_broker = described_class.new
 
-      expect(sns_broker.topic_arn_prefix).to eq env_prefix
-      expect(sns_broker.config[:default_arn_prefix]).to_not eq env_prefix
+      expect(sns_broker.instance_variable_get(:@topic_arn_prefix)).to eq env_prefix
     end
   end
 

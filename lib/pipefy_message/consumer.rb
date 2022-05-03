@@ -13,6 +13,7 @@ module PipefyMessage
   module Consumer
     include PipefyMessage::Logging
     include PipefyMessage::Providers::Errors
+    include PipefyMessage::Providers::BrokerResolver
     ##
     # Default options for consumer setup.
     def self.default_consumer_options

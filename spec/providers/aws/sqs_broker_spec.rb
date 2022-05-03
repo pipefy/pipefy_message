@@ -20,7 +20,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
     it "should set configurations vars from a hash arg or use defaults" do
       sqs_broker = described_class.new(queue_name: sqs_opts[:queue_name])
 
-      expect(sqs_broker.config).to eq sqs_opts
+      expect(sqs_broker.instance_variable_get(:@config)).to eq sqs_opts
     end
   end
 
