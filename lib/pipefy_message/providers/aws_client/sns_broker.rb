@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "aws-sdk-sns"
-require_relative "aws_broker"
+require_relative "aws_client"
 
 module PipefyMessage
   module Providers
@@ -12,7 +12,7 @@ module PipefyMessage
         include PipefyMessage::Logging
         include PipefyMessage::Providers::Errors
 
-        attr_reader :config
+        attr_reader :config, :topic_arn_prefix
 
         def initialize(opts = {})
           @config = default_options.merge(opts)
@@ -40,8 +40,10 @@ module PipefyMessage
         # with topic_name.
         def publish(payload, topic_name)
           message = prepare_payload(payload)
-          topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
+          topic_arn = @topic_arn_prefix + ":" + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
+
+          # require "pry"; binding.pry
 
           logger.info(
             { topic_arn: topic_arn,

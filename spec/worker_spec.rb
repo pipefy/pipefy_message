@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-$result =~ nil
-
 class MockBroker
-  def poller
-    yield("test")
-  end
+  def poller; end
 end
 
 class MockBrokerFail
@@ -20,7 +16,6 @@ class TestWorker
 
   def perform(message)
     puts message
-    $result = message
   end
 end
 
@@ -28,10 +23,13 @@ RSpec.describe PipefyMessage::Worker do
   describe "#perform" do
     context "successful polling" do
       it "should call #perform from child instance when #process_message is called" do
-        allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
+        mock_broker = instance_double("MockBroker")
+        allow(mock_broker).to receive(:poller).with(no_args)
+
+        allow(TestWorker).to receive(:build_instance_broker).and_return(mock_broker)
 
         TestWorker.process_message
-        expect($result).to eq "test"
+        expect(mock_broker).to have_received(:poller)
       end
     end
 

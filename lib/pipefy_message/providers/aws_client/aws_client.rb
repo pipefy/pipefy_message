@@ -2,7 +2,6 @@
 
 require "aws-sdk-sqs"
 require "json"
-require "active_support/core_ext" # Hash#except
 
 module PipefyMessage
   module Providers

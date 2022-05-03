@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "aws_broker"
+require_relative "aws_client"
 
 module PipefyMessage
   module Providers
@@ -17,6 +17,8 @@ module PipefyMessage
           @config = default_options.merge(opts)
 
           AwsClient.aws_setup
+
+          # require "pry"; binding.pry
 
           @sqs = Aws::SQS::Client.new
           logger.debug({ message_text: "SQS client created" })

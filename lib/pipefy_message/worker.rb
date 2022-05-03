@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "singleton"
 require "benchmark"
 require_relative "providers/errors"
 require_relative "providers/broker_resolver"
