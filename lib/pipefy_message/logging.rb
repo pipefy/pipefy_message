@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "English"
 require "logger"
 require "json"
 
@@ -35,7 +36,7 @@ module PipefyMessage
             level: severity.to_s,
             app: progname.to_s,
             context: "async_processing",
-            message: msg }.to_json + $INPUT_RECORD_SEPARATOR.to_s
+            message: msg }.to_json + $INPUT_RECORD_SEPARATOR
         end
       end
     end
