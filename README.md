@@ -1,6 +1,8 @@
 # PipefyMessage
 
-This project it's a gem who provides a simple way to produce and consume messages for async processing.
+This project is a gem that provides a simple way to produce and consume messages for async processing.
+
+The current implementation supports AWS SNS for sending messages (by publishing them to topics) and AWS SQS for receiving them (via queue polling).
 
 ## Requirements
 
@@ -33,7 +35,7 @@ Or install it yourself as:
 
 ### Publisher
 
-To use the publisher capabilities is required to "import our gem" at the desired class and call the publish method, see the example below:
+To use the publisher capabilities it is required to "import our gem" at the desired class, create an instance of the Publisher class and call the publish method on it. See the example below:
 
 ```ruby
 require "pipefy_message"
@@ -55,7 +57,7 @@ end
 
 ### Consumer
 
-To use the consumer capabilities is required to "import our gem" at your consumer class, include the abstraction, define the `perform` method and finally call the method `process_message` to start the consuming process, see the example below:
+To use the consumer capabilities it is required to "import our gem" at your consumer class, include the abstraction, define the `perform` method and finally call the method `process_message` on the consumer class (not an instance of it) to start the consuming process, see the example below:
 
 ```ruby
 require "pipefy_message"
@@ -77,7 +79,7 @@ ConsumerExampleClass.process_message
 
 ### Development - Test
 
-To test changes without install this dependency on your application, on your terminal go to the project root and execute:
+To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
     
 ```console
   export ENABLE_AWS_CLIENT_CONFIG=true
