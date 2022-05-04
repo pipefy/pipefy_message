@@ -27,7 +27,8 @@ RSpec.describe PipefyMessage::Providers::AwsClient do
     before do
       changed_opts = {
         "AWS_ACCESS_KEY_ID" => aws_opts[:access_key_id],
-        "AWS_SECRET_ACCESS_KEY" => aws_opts[:secret_access_key]
+        "AWS_SECRET_ACCESS_KEY" => aws_opts[:secret_access_key],
+        "AWS_CLI_STUB_RESPONSE" => aws_opts[:stub_responses]
       }
 
       stub_const("ENV", ENV.to_hash.merge(changed_opts))
