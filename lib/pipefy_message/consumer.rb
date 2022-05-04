@@ -14,6 +14,7 @@ module PipefyMessage
     include PipefyMessage::Logging
     include PipefyMessage::Providers::Errors
     include PipefyMessage::Providers::BrokerResolver
+
     ##
     # Default options for consumer setup.
     def self.default_consumer_options
@@ -47,33 +48,15 @@ module PipefyMessage
       # Merges default worker options with the hash passed as
       # an argument. The latter takes precedence.
       def options(opts = {})
-        @options = Consumer.default_consumer_options.merge(opts)
-        @options.each do |k, v|
-          singleton_class.class_eval { attr_accessor k }
-          send("#{k}=", v)
-        end
-
-        logger.debug({
-                       options_set: @options,
-                       message_text: "Set #{name} options to options_set"
-                     })
-      end
-
-      ##
-      # Sets broker-specific options to be passed to the broker's
-      # constructor.
-      def broker_options(opts = {})
-        @broker_opts = opts
+        @consumer_options = Consumer.default_consumer_options.merge(opts)
       end
 
       ##
       # Initializes and returns an instance of a broker for
       # the provider specified in the class options.
       def build_consumer_instance
-        options if @broker.nil?
-        broker_options if @broker_opts.nil?
-        consumer_map = resolve_broker(@broker, "consumer")
-        consumer_map[:class_name].constantize.new(@broker_opts)
+        consumer_map = resolve_broker(@consumer_options[:broker], "consumer")
+        consumer_map[:class_name].constantize.new(@consumer_options)
       end
 
       ##
@@ -85,27 +68,27 @@ module PipefyMessage
       def process_message
         start = Time.now
         obj = new
-        logger.info({
-                      message_text: "Calling poller for #{@broker} object"
-                    })
 
-        build_consumer_instance.poller do |message|
+        logger.info({ message_text: "Calling consumer poller" })
+
+        build_consumer_instance.poller do |payload|
           logger.info({
-                        message_text: "Message received by #{@broker} poller to be processed by consumer",
-                        received_message: message
+                        message_text: "Message received by poller to be processed by consumer",
+                        received_message: payload
                       })
-          obj.perform(message)
+
+          obj.perform(payload["Message"])
+
+          elapsed_time = (Time.now - start) * 1000.0
+          logger.info({
+                        duration_ms: elapsed_time,
+                        message_text: "Message received by consumer poller, processed " \
+                                      "in #{elapsed_time} milliseconds"
+                      })
         end
-      rescue PipefyMessage::Providers::Errors::ResourceError => e # (any others?)
+      rescue PipefyMessage::Providers::Errors::ResourceError => e
+        logger.error("Failed to process message, details #{e.inspect}")
         raise e
-      ensure
-        elapsed_time = (Time.now - start) * 1000.0
-        logger.info({
-                      duration_ms: elapsed_time,
-                      message_text: "Message received by #{@broker}" \
-                                    "poller processed by #{name} worker" \
-                                    "in #{elapsed_time} milliseconds"
-                    })
       end
     end
   end

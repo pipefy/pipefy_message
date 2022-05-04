@@ -32,13 +32,16 @@ module PipefyMessage
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.debug(build_log_hash("Initiating SQS polling on queue #{@config[:queue_name]}"))
+          logger.info(build_log_hash("Initiating SQS polling on queue #{@config[:queue_name]}"))
 
           @poller.poll(wait_time_seconds: @config[:wait_time_seconds]) do |received_message|
             logger.debug(build_log_hash("Message received by SQS poller on queue #{@config[:queue_name]}"))
 
             payload = JSON.parse(received_message.body)
             yield(payload)
+
+          rescue StandardError => e
+            raise PipefyMessage::Providers::Errors::ResourceError, e.message
           end
         end
 
