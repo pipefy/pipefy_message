@@ -1,43 +1,41 @@
 # frozen_string_literal: true
 
-$result =~ nil
-
-class MockBroker < PipefyMessage::Providers::Broker
-  def poller
-    yield("test")
-  end
+class MockBroker
+  def poller; end
 end
 
-class MockBrokerFail < PipefyMessage::Providers::Broker
+class MockBrokerFail
   def poller
     raise PipefyMessage::Providers::Errors::ResourceError
   end
 end
 
 class TestWorker
-  include PipefyMessage::Worker
-  pipefymessage_options broker: "aws", queue_name: "pipefy-local-queue"
+  include PipefyMessage::Consumer
+  options broker: "aws", queue_name: "pipefy-local-queue"
 
   def perform(message)
     puts message
-    $result = message
   end
 end
 
-RSpec.describe PipefyMessage::Worker do
+RSpec.describe PipefyMessage::Consumer do
   describe "#perform" do
     context "successful polling" do
       it "should call #perform from child instance when #process_message is called" do
-        allow(TestWorker).to receive(:build_instance_broker).and_return(MockBroker.new)
+        mock_broker = instance_double("MockBroker")
+        allow(mock_broker).to receive(:poller).with(no_args)
+
+        allow(TestWorker).to receive(:build_consumer_instance).and_return(mock_broker)
 
         TestWorker.process_message
-        expect($result).to eq "test"
+        expect(mock_broker).to have_received(:poller)
       end
     end
 
     context "polling failure" do
       it "should call #perform from child instance when #process_message is called" do
-        allow(TestWorker).to receive(:build_instance_broker).and_return(MockBrokerFail.new)
+        allow(TestWorker).to receive(:build_consumer_instance).and_return(MockBrokerFail.new)
         expect { TestWorker.process_message }.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
       end
     end
@@ -64,7 +62,7 @@ RSpec.describe PipefyMessage::Worker do
       end
 
       it "should raise an error" do
-        expect { TestWorker.build_instance_broker }.to raise_error PipefyMessage::Providers::Errors::InvalidOption
+        expect { TestWorker.build_consumer_instance }.to raise_error PipefyMessage::Providers::Errors::InvalidOption
       end
     end
 

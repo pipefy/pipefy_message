@@ -6,13 +6,16 @@ module PipefyMessage
   # Base Publisher provided by this gem, to be used for the external publishers to send messages to a broker
   class Publisher
     include PipefyMessage::Logging
+    include PipefyMessage::Providers::BrokerResolver
 
-    def initialize(broker = "aws")
+    def initialize(broker = "aws", broker_opts = {})
       @broker = broker
+      @broker_opts = broker_opts
+      @publisher_instance = build_publisher_instance
     end
 
     def publish(message, topic)
-      publisher_instance.publish(message, topic)
+      @publisher_instance.publish(message, topic)
     end
 
     private
@@ -20,24 +23,9 @@ module PipefyMessage
     ##
     # Initializes and returns an instance of a broker for
     # the provider specified in the class options.
-    def publisher_instance
-      provider_map = PipefyMessage::Providers::BrokerResolver.class_path[@broker.to_sym]
-
-      if provider_map.nil?
-        error_msg = "Invalid provider specified: #{@broker}"
-
-        raise PipefyMessage::Providers::Errors::InvalidOption, error_msg
-      end
-
-      publisher_map = provider_map[:publisher]
-      require_relative publisher_map[:relative_path]
-
-      logger.info({
-                    broker: @broker,
-                    message_text: "Initializing instance of #{@broker} broker"
-                  })
-
-      publisher_map[:class_name].constantize.new
+    def build_publisher_instance
+      publisher_map = resolve_broker(@broker, "publisher")
+      publisher_map[:class_name].constantize.new(@broker_opts)
     end
   end
 end

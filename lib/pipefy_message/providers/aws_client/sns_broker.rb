@@ -1,33 +1,27 @@
 # frozen_string_literal: true
 
 require "aws-sdk-sns"
-require_relative "aws_broker"
+require_relative "aws_client"
 
 module PipefyMessage
   module Providers
     module AwsClient
       ##
       # AWS SNS client.
-      class SnsBroker < PipefyMessage::Providers::AwsClient::AwsBroker
-        attr_reader :config
+      class SnsBroker
+        include PipefyMessage::Logging
+        include PipefyMessage::Providers::Errors
 
-        def initialize(opts = {})
-          super(opts)
+        def initialize(_opts = {})
+          AwsClient.aws_setup
 
           @sns = Aws::SNS::Resource.new
           logger.debug({ message_text: "SNS resource created" })
 
-          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || @config[:default_arn_prefix]
+          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || "arn:aws:sns:us-east-1:000000000000:"
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         rescue StandardError
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
-        end
-
-        ##
-        # Extends AWS default options to include a value
-        # for SNS-specific configurations.
-        def default_options
-          super.merge(default_arn_prefix: "arn:aws:sns:us-east-1:000000000000")
         end
 
         ##
