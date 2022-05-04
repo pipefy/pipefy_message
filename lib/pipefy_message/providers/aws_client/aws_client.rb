@@ -21,8 +21,6 @@ module PipefyMessage
         Aws.config.update(retrieve_config)
       end
 
-      private
-
       def self.aws_client_config?
         ENV["ENABLE_AWS_CLIENT_CONFIG"] == "true"
       end
