@@ -1,6 +1,8 @@
 # PipefyMessage
 
-This project it's a gem who provides a simple way to produce and consume messages for async processing.
+This project is a gem that provides a simple way to produce and consume messages for async processing.
+
+The current implementation supports AWS SNS for sending messages (by publishing them to topics) and AWS SQS for receiving them (via queue polling).
 
 ## Requirements
 
@@ -31,16 +33,57 @@ Or install it yourself as:
 
 ## Usage
 
-### Development
+### Publisher
 
-To test changes without install this dependency on your application, on your terminal go to the project root and execute:
+To use the publisher capabilities it is required to "import our gem" at the desired class, create an instance of the Publisher class and call the publish method on it. See the example below:
+
+```ruby
+require "pipefy_message"
+
+##
+# Example publisher class.
+class PublisherExampleClass
+  def awesomeLogic
+    
+    ## business logic
+    
+    payload = { foo: "bar" }
+    publisher = PipefyMessage::Publisher.new
+    result = publisher.publish(payload, "pipefy-local-topic")
+    puts result ## will print some data like the messageID and so on
+  end
+end
+```
+
+### Consumer
+
+To use the consumer capabilities it is required to "import our gem" at your consumer class, include the abstraction, define the `perform` method and finally call the method `process_message` on the consumer class (not an instance of it) to start the consuming process, see the example below:
+
+```ruby
+require "pipefy_message"
+
+##
+# Example consumer class.
+class ConsumerExampleClass
+  include PipefyMessage::Consumer
+  options queue_name: "pipefy-local-queue"
+
+  def perform(message)
+    puts "Received message #{message} from broker"
+    ## Fill with your business logic here
+  end
+end
+
+ConsumerExampleClass.process_message
+```
+
+### Development - Test
+
+To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
     
 ```console
-  export AWS_ACCESS_KEY_ID=foo
-  export AWS_SECRET_ACCESS_KEY=bar
-  export AWS_ENDPOINT="http://localhost:4566"
   export ENABLE_AWS_CLIENT_CONFIG=true
-  
+    
   make build-app
   make build-app-infra
 ```
@@ -61,28 +104,20 @@ On the irb console:
 
 * Publish a message
     ```ruby
-    require 'pipefy_message'
-    message = PipefyMessage::Test.new
-    message.publish
+    require_relative 'lib/samples/my_awesome_publisher.rb'
+    publisher = MyAwesomePublisher.new
+    publisher.publish
     ```
 
 * Consume a message
     ```ruby
-    require 'pipefy_message'
-    message = PipefyMessage::Test.new
-    message.consume
-    ```
-
-* Publish and Consume a message
-    ```ruby
-    require 'pipefy_message'
-    message = PipefyMessage::Test.new
-    message.publish_and_consume
+    require_relative 'lib/samples/my_awesome_consumer.rb'
+    MyAwesomeConsumer.process_message
     ```
 
 ## Project Stack
 
-- [Aws SDK Ruby - SNS & SQS](https://github.com/aws/aws-sdk-ruby)
+- [Aws SDK Ruby - SNS & SQS](https://github.com/aws_client/aws-sdk-ruby)
 - [Bundler](https://bundler.io/)
 - Docker-compose
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -92,7 +127,7 @@ On the irb console:
 
 ## Brokers Documentation
 
-* [SNS & SQS User guide](https://github.com/pipefy/pipefy_message/tree/main/lib/pipefy_message/broker/aws/README.md)
+* [SNS & SQS User guide](https://github.com/pipefy/pipefy_message/tree/main/lib/pipefy_message/broker/aws_client/README.md)
 
 ## Contributing
 
