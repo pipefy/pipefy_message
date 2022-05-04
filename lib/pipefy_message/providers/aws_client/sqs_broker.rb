@@ -19,7 +19,7 @@ module PipefyMessage
           @sqs = Aws::SQS::Client.new
           logger.debug({ message_text: "SQS client created" })
 
-          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || "arn:aws:sns:us-east-1:000000000000"
+          @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
           queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url

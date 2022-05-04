@@ -20,7 +20,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient do
         secret_access_key: "so-we-know-it-worked", # changed
         endpoint: "http://localhost:4566", # default (not set)
         region: "us-east-1", # default (not set)
-        stub_responses: "true" # default (not set)
+        stub_responses: "true" # changed
       }
     end
 

@@ -38,7 +38,7 @@ module PipefyMessage
             access_key_id: ENV.fetch("AWS_ACCESS_KEY_ID", "foo"),
             secret_access_key: ENV.fetch("AWS_SECRET_ACCESS_KEY", "bar"),
             endpoint: ENV.fetch("AWS_ENDPOINT", "http://localhost:4566"),
-            stub_responses: ENV["AWS_CLI_STUB_RESPONSE"] || false
+            stub_responses: ENV.fetch("AWS_CLI_STUB_RESPONSE", false)
           }.merge(config)
         else
           config
