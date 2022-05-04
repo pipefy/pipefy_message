@@ -13,4 +13,3 @@ class MyAwesomeConsumer
     ## Fill with our logic here
   end
 end
-

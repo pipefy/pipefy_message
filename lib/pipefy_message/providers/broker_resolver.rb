@@ -23,7 +23,7 @@ module PipefyMessage
 
         logger.info({
                       broker: broker,
-                      message_text: "Initializing instance of #{broker} #{type}"
+                      message_text: "Resolved instance of #{broker} #{type}"
                     })
 
         map
