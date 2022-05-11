@@ -27,12 +27,14 @@ Gem::Specification.new do |spec|
     end
   end
   spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  # spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.executables   = %w[pipefymessages]
   spec.require_paths = ["lib"]
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency  "aws-sdk-sns", "~> 1.50.0"
   spec.add_dependency  "aws-sdk-sqs", "~> 1.49.0"
+  spec.add_dependency "thor"
 
   # For more information and examples about making a new gem, checkout our
   # guide at: https://bundler.io/guides/creating_gem.html

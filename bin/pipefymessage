@@ -1,0 +1,56 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "singleton"
+require "thor"
+
+module PipefyMessage
+  # CLI
+  class CLI < Thor
+    default_task :start
+
+    desc "start", "Starts PipefyMessage consumer"
+    method_option :worker, aliases: "-w", type: :string, desc: "Worker to load"
+    method_option :require, aliases: "-r", type: :string, desc: "Dir or path of the workers"
+    method_option :rails, aliases: "-R", type: :boolean, desc: "Load Rails", default: false
+    def start
+      PipefyMessage::Runner.instance.initialize_rails if options[:rails]
+      PipefyMessage::Runner.instance.require_workers(options[:require]) if options[:require]
+      puts "Hello"
+    end
+  end
+
+  # Runner
+  class Runner
+    include Singleton
+    def initialize_rails
+      # Adapted from: https://github.com/mperham/sidekiq/blob/master/lib/sidekiq/cli.rb
+
+      require "rails"
+      if ::Rails::VERSION::MAJOR < 4
+        require File.expand_path("config/environment.rb")
+        ::Rails.application.eager_load!
+      else
+        require File.expand_path("config/application.rb")
+        if ::Rails::VERSION::MAJOR == 4
+          ::Rails::Application.initializer "shoryuken.eager_load" do
+            ::Rails.application.config.eager_load = true
+          end
+        end
+        require File.expand_path("config/environment.rb")
+      end
+    end
+
+    def require_workers(required)
+      return unless required
+
+      if File.directory?(required)
+        Dir[File.join(required, "**", "*.rb")].each(&method(:require))
+      else
+        require required
+      end
+    end
+  end
+end
+
+PipefyMessage::CLI.start(ARGV)
