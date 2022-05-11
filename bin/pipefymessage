@@ -32,11 +32,6 @@ module PipefyMessage
         ::Rails.application.eager_load!
       else
         require File.expand_path("config/application.rb")
-        if ::Rails::VERSION::MAJOR == 4
-          ::Rails::Application.initializer "shoryuken.eager_load" do
-            ::Rails.application.config.eager_load = true
-          end
-        end
         require File.expand_path("config/environment.rb")
       end
     end
