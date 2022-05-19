@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pipefy_message (1.0.0)
+    pipefy_message (0.1.1)
       aws-sdk-sns (~> 1.50.0)
       aws-sdk-sqs (~> 1.49.0)
       thor
