@@ -15,7 +15,6 @@ module PipefyMessage
     method_option :rails, aliases: "-R", type: :boolean, desc: "Load Rails", default: false
     def start
       PipefyMessage::Runner.instance.initialize_rails if options[:rails]
-      PipefyMessage::Runner.instance.require_workers(options[:require]) if options[:require]
       PipefyMessage::Runner.instance.run(options[:worker]) if options[:worker]
     end
   end
@@ -38,16 +37,6 @@ module PipefyMessage
 
     def run(worker)
       worker.constantize.process_message
-    end
-
-    def require_workers(required)
-      return unless required
-
-      if File.directory?(required)
-        Dir[File.join(required, "**", "*.rb")].each(&method(:require))
-      else
-        require required
-      end
     end
   end
 end
