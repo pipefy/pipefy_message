@@ -28,7 +28,7 @@ module PipefyMessage
       # Hash that fetches AWS options from environment variables or
       # sets the base and custom values.
       def self.retrieve_config
-        config = { region: ENV["AWS_REGION"] || "us-east-1" }
+        config = { region: ENV.fetch("AWS_REGION", "us-east-1") }
         merge_custom_config(config)
       end
 

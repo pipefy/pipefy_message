@@ -18,7 +18,7 @@ module PipefyMessage
           @sns = Aws::SNS::Resource.new
           logger.debug({ message_text: "SNS resource created" })
 
-          @topic_arn_prefix = ENV["AWS_SNS_ARN_PREFIX"] || "arn:aws:sns:us-east-1:000000000000:"
+          @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000:")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         rescue StandardError
           raise PipefyMessage::Providers::Errors::ResourceError, e.message

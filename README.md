@@ -73,15 +73,20 @@ class ConsumerExampleClass
     ## Fill with your business logic here
   end
 end
+```
 
-ConsumerExampleClass.process_message
+### Start PipefyMessages Consumer
+To start `consumer` inside a Rails applications:
+
+```shell
+bundle exec pipefymessage -w ConsumerExampleClass -R
 ```
 
 ### Development - Test
 
 To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
     
-```console
+```shell
   export ENABLE_AWS_CLIENT_CONFIG=true
     
   make build-app
@@ -90,13 +95,13 @@ To test changes without installing this dependency on your application, on your 
 
 If you need to recreate the infra (SNS and SQS) run:
 
-```console
+```shell
   make recreate-app-infra
 ```
 
 After that, we are going to test the gem with these commands:
 
-```console
+```shell
   irb
 ```
 
