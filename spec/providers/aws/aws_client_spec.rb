@@ -48,6 +48,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient do
       TestClient.new
 
       ENV["AWS_CLI_STUB_RESPONSE"] = "false"
+      ENV["ENABLE_AWS_CLIENT_CONFIG"] = "false"
       TestClient.new
 
       expect(Aws.config).to eq aws_opts
