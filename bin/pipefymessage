@@ -13,8 +13,10 @@ module PipefyMessage
     desc "start", "Starts PipefyMessage consumer"
     method_option :worker, aliases: "-w", type: :string, desc: "Worker to load"
     method_option :rails, aliases: "-R", type: :boolean, desc: "Load Rails", default: false
+    method_option :pidfile,     aliases: '-P', type: :string,  desc: 'Path to pidfile'
     def start
       PipefyMessage::Runner.instance.initialize_rails if options[:rails]
+      PipefyMessage::Runner.instance.write_pid(options) if options[:pidfile]
       PipefyMessage::Runner.instance.run(options[:worker]) if options[:worker]
     end
   end
@@ -33,6 +35,12 @@ module PipefyMessage
         require File.expand_path("config/application.rb")
         require File.expand_path("config/environment.rb")
       end
+    end
+
+    def write_pid(options)
+      return unless (path = options[:pidfile])
+
+      File.open(path, 'w') { |f| f.puts(Process.pid) }
     end
 
     def run(worker)
