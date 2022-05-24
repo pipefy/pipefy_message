@@ -23,6 +23,11 @@ module PipefyMessage
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
           queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url
+
+          queue_url = queue_url.sub("http:", "https:")
+          # The string returned by the SQS client object is frozen,
+          # so we can't use something like sub!.
+
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
