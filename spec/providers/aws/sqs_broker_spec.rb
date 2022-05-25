@@ -32,7 +32,6 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
 
       expect(sqs_broker.instance_variable_get(:@poller).instance_variable_get(:@queue_url)).to eq "https://fake/url"
     end
-
   end
 
   describe "#poller" do
