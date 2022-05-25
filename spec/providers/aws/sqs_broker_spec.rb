@@ -22,6 +22,16 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
 
       expect(sqs_broker.instance_variable_get(:@config)).to eq sqs_opts
     end
+
+    it "should convert HTTP URLs to HTTPS" do
+      mock_sqs_client = instance_double("Aws::SQS::Client")
+      allow(mock_sqs_client).to receive(:get_queue_url).and_return(Aws::SQS::Types::GetQueueUrlResult.new(queue_url: "http://fake/url"))
+      allow(Aws::SQS::Client).to receive(:new).and_return(mock_sqs_client)
+
+      sqs_broker = described_class.new(queue_name: sqs_opts[:queue_name])
+
+      expect(sqs_broker.instance_variable_get(:@poller).instance_variable_get(:@queue_url)).to eq "https://fake/url"
+    end
   end
 
   describe "#poller" do

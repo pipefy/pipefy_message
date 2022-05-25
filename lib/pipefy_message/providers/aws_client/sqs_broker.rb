@@ -22,7 +22,8 @@ module PipefyMessage
           @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
-          queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url
+          queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url.sub(%r{^http://}, "https://")
+
           @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
