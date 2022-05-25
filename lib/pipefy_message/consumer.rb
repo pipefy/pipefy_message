@@ -79,7 +79,7 @@ module PipefyMessage
 
           obj.perform(payload["Message"])
 
-          elapsed_time_ms = (start - Process.clock_gettime(Process::CLOCK_MONOTONIC)) * 1000
+          elapsed_time_ms = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - start) * 1000
           logger.info({
                         duration_ms: elapsed_time_ms,
                         message_text: "Message received by consumer poller, processed " \
