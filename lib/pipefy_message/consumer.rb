@@ -81,9 +81,9 @@ module PipefyMessage
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info({
-                        duration_ms: elapsed_time,
+                        duration_ms: elapsed_time_ms,
                         message_text: "Message received by consumer poller, processed " \
-                                      "in #{elapsed_time} milliseconds"
+                                      "in #{elapsed_time_ms} milliseconds"
                       })
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e
