@@ -66,7 +66,7 @@ module PipefyMessage
       # from which the call to process_message was made (see perform
       # method in the parent module).
       def process_message
-        start = Time.now
+        start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
         obj = new
 
         logger.info({ message_text: "Calling consumer poller" })
@@ -79,9 +79,9 @@ module PipefyMessage
 
           obj.perform(payload["Message"])
 
-          elapsed_time = (Time.now - start) * 1000.0
+          elapsed_time_ms = (start - Process.clock_gettime(Process::CLOCK_MONOTONIC)) * 1000
           logger.info({
-                        duration_ms: elapsed_time,
+                        duration_ms: elapsed_time_ms,
                         message_text: "Message received by consumer poller, processed " \
                                       "in #{elapsed_time} milliseconds"
                       })
