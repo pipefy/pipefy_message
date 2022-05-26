@@ -18,13 +18,12 @@ module PipefyMessage
 
           @sqs = Aws::SQS::Client.new
           logger.debug({ message_text: "SQS client created" })
-
-          @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
-          queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url.sub(%r{^http://}, "https://")
+          @queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url.sub(%r{^http://}, "https://")
+          @queue_url = (@is_staging ? "#{@queue_url}-staging" : @queue_url)
 
-          @poller = Aws::SQS::QueuePoller.new(queue_url, { client: @sqs })
+          @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
@@ -33,10 +32,10 @@ module PipefyMessage
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.info(build_log_hash("Initiating SQS polling on queue #{@config[:queue_name]}"))
+          logger.info(build_log_hash("Initiating SQS polling on queue #{@queue_url}"))
 
           @poller.poll(wait_time_seconds: @config[:wait_time_seconds]) do |received_message|
-            logger.debug(build_log_hash("Message received by SQS poller on queue #{@config[:queue_name]}"))
+            logger.debug(build_log_hash("Message received by SQS poller on queue #{@queue_url}"))
 
             payload = JSON.parse(received_message.body)
             yield(payload)
