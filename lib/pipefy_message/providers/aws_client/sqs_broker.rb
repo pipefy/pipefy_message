@@ -61,7 +61,7 @@ module PipefyMessage
         end
 
         ##
-        #
+        # Adds the staging prefix to queue names where applicable.
         def handle_queue_name(queue_name)
           @is_staging ? "#{queue_name}-staging" : queue_name
         end
