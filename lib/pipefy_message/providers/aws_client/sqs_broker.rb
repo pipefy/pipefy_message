@@ -20,8 +20,8 @@ module PipefyMessage
           logger.debug({ message_text: "SQS client created" })
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
-          @queue_url = @sqs.get_queue_url({ queue_name: @config[:queue_name] }).queue_url.sub(%r{^http://}, "https://")
-          @queue_url = (@is_staging ? "#{@queue_url}-staging" : @queue_url)
+          @queue_url = @sqs.get_queue_url({ queue_name: handle_queue_name(@config[:queue_name]) })
+                           .queue_url.sub(%r{^http://}, "https://")
 
           @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
         rescue StandardError => e
@@ -58,6 +58,12 @@ module PipefyMessage
         # Adds the queue name to logs, if not already present.
         def build_log_hash(arg)
           { queue_name: @config[:queue_name], message_text: arg }
+        end
+
+        ##
+        #
+        def handle_queue_name(queue_name)
+          @is_staging ? "#{queue_name}-staging" : queue_name
         end
       end
     end

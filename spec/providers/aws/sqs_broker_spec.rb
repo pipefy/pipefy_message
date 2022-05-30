@@ -34,6 +34,21 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
     end
   end
 
+  it "should handle queue name by environment " do
+    [{ env: "staging", expected_queue_name: "test_queue-staging" },
+     { env: "dev", expected_queue_name: "test_queue" },
+     { env: "prod", expected_queue_name: "test_queue" }].each do |obj|
+      ENV["ASYNC_APP_ENV"] = obj[:env]
+      mock_sqs_client = instance_double("Aws::SQS::Client")
+      allow(mock_sqs_client).to receive(:get_queue_url).and_return(Aws::SQS::Types::GetQueueUrlResult.new(queue_url: "http://fake/url"))
+      allow(Aws::SQS::Client).to receive(:new).and_return(mock_sqs_client)
+
+      described_class.new(queue_name: "test_queue")
+
+      expect(mock_sqs_client).to have_received(:get_queue_url).with({ queue_name: obj[:expected_queue_name] })
+    end
+  end
+
   describe "#poller" do
     it "should consume a message" do
       mocked_message = { message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
