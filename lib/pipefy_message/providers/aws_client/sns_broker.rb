@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "aws-sdk-sns"
+require "securerandom"
 require_relative "aws_client"
 
 module PipefyMessage
@@ -27,7 +28,7 @@ module PipefyMessage
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
-        def publish(payload, topic_name)
+        def publish(payload, topic_name, context = nil)
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
@@ -38,7 +39,17 @@ module PipefyMessage
               message_text: "Attempting to publish a json message to topic #{topic_arn}" }
           )
 
-          result = topic.publish({ message: message.to_json, message_structure: " json " })
+          result = topic.publish({ message: message.to_json, message_structure: " json ",
+                                   message_attributes: {
+                                     "correlationId" => {
+                                       data_type: "String",
+                                       string_value: SecureRandom.uuid.to_s
+                                     },
+                                     "context" => {
+                                       data_type: "String",
+                                       string_value: context
+                                     }
+                                   } })
 
           logger.info(
             { topic_arn: topic_arn,
