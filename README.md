@@ -87,7 +87,8 @@ bundle exec pipefymessage -w ConsumerExampleClass -R
 To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
     
 ```shell
-  export ENABLE_AWS_CLIENT_CONFIG=true
+  export ENABLE_AWS_CLIENT_CONFIG="true"
+  export ASYNC_APP_ENV="development" 
     
   make build-app
   make build-app-infra

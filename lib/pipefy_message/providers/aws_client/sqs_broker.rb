@@ -20,8 +20,8 @@ module PipefyMessage
           logger.debug({ message_text: "SQS client created" })
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
-          @queue_url = @sqs.get_queue_url({ queue_name: handle_queue_name(@config[:queue_name]) })
-                           .queue_url.sub(%r{^http://}, "https://")
+          @queue_url = handle_queue_protocol(@sqs.get_queue_url({ queue_name: handle_queue_name(@config[:queue_name]) })
+                           .queue_url)
 
           @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
         rescue StandardError => e
@@ -64,6 +64,10 @@ module PipefyMessage
         # Adds the staging suffix to queue names where applicable.
         def handle_queue_name(queue_name)
           @is_staging ? "#{queue_name}-staging" : queue_name
+        end
+
+        def handle_queue_protocol(queue_url)
+          ENV["ASYNC_APP_ENV"] == "development" ? queue_url : queue_url.sub(%r{^http://}, "https://")
         end
       end
     end
