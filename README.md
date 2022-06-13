@@ -85,7 +85,12 @@ bundle exec pipefymessage -w ConsumerExampleClass -R
 ### Development - Test
 
 To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
-    
+
+> **:information_source: Environment Variables info.**  
+>> ENABLE_AWS_CLIENT_CONFIG is used to allow us to connect in the localstack service instead AWS
+> 
+>> ASYNC_APP_ENV is used to specify the environment and handle some actions/adjustments on each one like protocol, queue name, and so on
+
 ```shell
   export ENABLE_AWS_CLIENT_CONFIG="true"
   export ASYNC_APP_ENV="development" 
