@@ -36,7 +36,7 @@ module PipefyMessage
           logger.info(
             { topic_arn: topic_arn,
               payload: payload,
-              message_text: "Attempting to publish a json message to topic #{topic_arn}}" }
+              message_text: "Attempting to publish a json message to topic #{topic_arn}" }
           )
 
           result = topic.publish({ message: message.to_json, message_structure: " json ",

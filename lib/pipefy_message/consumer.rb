@@ -71,11 +71,11 @@ module PipefyMessage
 
         logger.info({ message_text: "Calling consumer poller" })
 
-        build_consumer_instance.poller do |payload, message_attributes|
+        build_consumer_instance.poller do |payload, metadata|
           logger.info({
                         message_text: "Message received by poller to be processed by consumer",
                         received_message: payload,
-                        message_attributes: message_attributes
+                        metadata: metadata
                       })
 
           obj.perform(payload["Message"])
