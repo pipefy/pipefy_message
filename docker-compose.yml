@@ -4,7 +4,7 @@ services:
 
   localstack:
     container_name: localstack
-    image: localstack/localstack-light:0.11.5
+    image: localstack/localstack-light:0.14.3
     environment:
       AWS_DEFAULT_REGION: us-east-1
       LOCALSTACK_SERVICES: sns,sqs
