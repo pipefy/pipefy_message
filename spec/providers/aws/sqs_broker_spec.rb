@@ -23,14 +23,21 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       expect(sqs_broker.instance_variable_get(:@config)).to eq sqs_opts
     end
 
-    it "should convert HTTP URLs to HTTPS" do
-      mock_sqs_client = instance_double("Aws::SQS::Client")
-      allow(mock_sqs_client).to receive(:get_queue_url).and_return(Aws::SQS::Types::GetQueueUrlResult.new(queue_url: "http://fake/url"))
-      allow(Aws::SQS::Client).to receive(:new).and_return(mock_sqs_client)
+    it "should convert HTTP URLs to HTTPS by environment" do
+      [{ env: "staging", expected_protocol: "https" },
+       { env: "development", expected_protocol: "http" },
+       { env: "prod", expected_protocol: "https" }].each do |obj|
+        ENV["ASYNC_APP_ENV"] = obj[:env]
+        mock_sqs_client = instance_double("Aws::SQS::Client")
+        mocked_queue_url = Aws::SQS::Types::GetQueueUrlResult.new(queue_url: "http://fake/url")
+        allow(mock_sqs_client).to receive(:get_queue_url).and_return(mocked_queue_url)
+        allow(Aws::SQS::Client).to receive(:new).and_return(mock_sqs_client)
 
-      sqs_broker = described_class.new(queue_name: sqs_opts[:queue_name])
+        sqs_broker = described_class.new(queue_name: sqs_opts[:queue_name])
 
-      expect(sqs_broker.instance_variable_get(:@poller).instance_variable_get(:@queue_url)).to eq "https://fake/url"
+        expected_queue_url = "#{obj[:expected_protocol]}://fake/url"
+        expect(sqs_broker.instance_variable_get(:@poller).instance_variable_get(:@queue_url)).to eq expected_queue_url
+      end
     end
   end
 
