@@ -28,7 +28,8 @@ module PipefyMessage
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
-        def publish(payload, topic_name, context = "NO_CONTEXT_PROVIDED")
+        def publish(payload, topic_name, context = nil)
+          context = "NO_CONTEXT_PROVIDED" if context.nil?
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
