@@ -78,7 +78,8 @@ module PipefyMessage
                         metadata: metadata
                       })
 
-          obj.perform(payload["Message"])
+          retry_count = metadata["ApproximateReceiveCount"].to_i - 1
+          obj.perform(payload["Message"], retry_count)
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info({
