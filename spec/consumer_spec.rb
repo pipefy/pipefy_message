@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-class MockBroker
-  def poller; end
-end
+require "aws-sdk-core"
+require "pipefy_message/providers/aws_client/sqs_broker"
 
 class MockBrokerFail
   def poller
@@ -14,8 +13,18 @@ class TestConsumer
   include PipefyMessage::Consumer
   options broker: "aws", queue_name: "pipefy-local-queue"
 
-  def perform(message)
-    puts message
+  def perform(message, metadata)
+    puts "#{message} - #{metadata}"
+  end
+end
+
+class MockTestConsumerFail
+  include PipefyMessage::Consumer
+  options broker: "aws", queue_name: "pipefy-local-queue"
+
+  def perform(message, metadata)
+    puts "#{message} - #{metadata}"
+    throw StandardError
   end
 end
 
@@ -23,17 +32,54 @@ RSpec.describe PipefyMessage::Consumer do
   before do
     ENV["ENABLE_AWS_CLIENT_CONFIG"] = "true"
     ENV["AWS_CLI_STUB_RESPONSE"] = "true"
+
+    Aws.config[:sqs] = {
+      stub_responses: {
+        receive_message: [
+          { messages: [{ message_id: "950b674b-0e9f-4336-8a32-7502dbf2eb36",
+                         receipt_handle: "950b674b-0e9f-4336-8a32-7502dbf2eb36", body: { foo: "bar" }.to_json,
+                         attributes: { "ApproximateReceiveCount" => "1" } }] }
+        ],
+        get_queue_url: [
+          { queue_url: "http://localhost" }
+        ]
+      }
+    }
+  end
+  after do
+    Aws.config = {} # undoing changes
+    # (to avoid test "cross-contamination")
   end
   describe "#perform" do
-    context "successful polling" do
+    context "successful polling with SQS Broker" do
       it "should call #perform from child instance when #process_message is called" do
-        mock_broker = instance_double("MockBroker")
-        allow(mock_broker).to receive(:poller).with(no_args)
+        sqs_mock_broker = PipefyMessage::Providers::AwsClient::SqsBroker.new({ queue_name: "pipefy-local-queue" })
+        poller = sqs_mock_broker.instance_variable_get(:@poller)
+        poller.before_request do |stats|
+          throw :stop_polling if stats.received_message_count >= 1
+        end
 
-        allow(TestConsumer).to receive(:build_consumer_instance).and_return(mock_broker)
+        allow(TestConsumer).to receive(:build_consumer_instance).and_return(sqs_mock_broker)
 
         TestConsumer.process_message
-        expect(mock_broker).to have_received(:poller)
+      end
+    end
+
+    context "continue polling after failure with SQS broker" do
+      it "should continue calling #perform after any failure" do
+        sqs_mock_broker = PipefyMessage::Providers::AwsClient::SqsBroker.new({ queue_name: "pipefy-local-queue" })
+        poller = sqs_mock_broker.instance_variable_get(:@poller)
+        received_message_counter = 0
+
+        poller.before_request do |stats|
+          received_message_counter = stats.received_message_count
+          throw :stop_polling if stats.received_message_count == 2
+        end
+
+        allow(MockTestConsumerFail).to receive(:build_consumer_instance).and_return(sqs_mock_broker)
+
+        MockTestConsumerFail.process_message
+        expect(received_message_counter).to be == 2
       end
     end
 
@@ -45,7 +91,7 @@ RSpec.describe PipefyMessage::Consumer do
     end
 
     it "should fail if called directly from the parent class" do
-      expect { TestConsumer.perform("message") }.to raise_error NotImplementedError
+      expect { TestConsumer.perform("message", {}) }.to raise_error NotImplementedError
     end
   end
 

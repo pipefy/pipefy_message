@@ -10,7 +10,7 @@ delete-app-infra:
 	@docker-compose down -v --remove-orphans
 
 build-app:
-	bundle install
+	bundle install --no-cache
 	gem build pipefy_message.gemspec
 	gem install pipefy_message-[0-9].[0-9].[0-9].gem
 
