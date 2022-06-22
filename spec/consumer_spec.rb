@@ -14,8 +14,8 @@ class TestConsumer
   include PipefyMessage::Consumer
   options broker: "aws", queue_name: "pipefy-local-queue"
 
-  def perform(message)
-    puts message
+  def perform(message, metadata)
+    puts "#{message} - #{metadata}"
   end
 end
 
@@ -45,7 +45,7 @@ RSpec.describe PipefyMessage::Consumer do
     end
 
     it "should fail if called directly from the parent class" do
-      expect { TestConsumer.perform("message") }.to raise_error NotImplementedError
+      expect { TestConsumer.perform("message", {}) }.to raise_error NotImplementedError
     end
   end
 

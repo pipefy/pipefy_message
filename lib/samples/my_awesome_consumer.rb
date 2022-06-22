@@ -8,8 +8,9 @@ class MyAwesomeConsumer
   include PipefyMessage::Consumer
   options queue_name: "pipefy-local-queue"
 
-  def perform(message, retry_count)
-    puts "Received message #{message} from broker - retry #{retry_count}"
+  def perform(message, metadata)
+    puts "Received message #{message} from broker - retry #{metadata[:retry_count]}"
     ## Fill with our logic here
+    raise StandardError
   end
 end

@@ -35,7 +35,7 @@ module PipefyMessage
     # To be defined by classes that include this module. Processes
     # messages received by the poller. Called by process_message from
     # an instance of the including class.
-    def perform(_message)
+    def perform(_message, _metadata)
       error_msg = includer_should_implement(__method__)
       raise NotImplementedError, error_msg
     end
@@ -79,7 +79,7 @@ module PipefyMessage
                       })
 
           retry_count = metadata["ApproximateReceiveCount"].to_i - 1
-          obj.perform(payload["Message"], retry_count)
+          obj.perform(payload["Message"], { retry_count: retry_count })
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info({
