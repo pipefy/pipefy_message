@@ -44,6 +44,9 @@ module PipefyMessage
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
             logger.error("Failed to process message, details #{e.inspect}")
+
+            throw e if e.instance_of?(NameError)
+
             throw :skip_delete
           end
         end
