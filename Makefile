@@ -10,7 +10,7 @@ help:
 	@echo "    run-lint-fix          Fix linter issues"
 	@echo "    test                  Run rspec tests"
 
-.PHONY: build-app-infra
+.PHONY: build-app
 build-app:
 	bundle install --no-cache
 	gem build pipefy_message.gemspec
