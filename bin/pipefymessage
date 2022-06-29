@@ -40,7 +40,7 @@ module PipefyMessage
         require File.expand_path("config/environment.rb")
       end
 
-      puts "Booted Rails #{::Rails.version} application in #{ ENV["RAILS_ENV"]} environment" 
+      puts "Booted Rails #{::Rails.version} application in #{ ENV["RAILS_ENV"]} environment"
     end
 
     def write_pid(options)
