@@ -1,15 +1,17 @@
-# PipefyMessage
+# Pipefy Message
 
-This project is a gem that provides a simple way to produce and consume messages for async processing.
+This project is a Ruby gem that provides a simple way to produce and consume
+messages for asynchronous processing.
 
-The current implementation supports AWS SNS for sending messages (by publishing them to topics) and AWS SQS for receiving them (via queue polling).
+The current implementation supports AWS SNS for sending messages (by publishing
+them to topics) and AWS SQS for receiving them (via queue polling).
 
 ## Requirements
-
-This project requires the following to run:
-
-- Ruby 2.6.6
+- Ruby 2.7.6
 - [Bundler](https://bundler.io/)
+- GNU Make
+- Docker (optional, for tests)
+- Docker Compose (optional, for tests)
 
 ## Installation
 
@@ -35,7 +37,9 @@ Or install it yourself as:
 
 ### Publisher
 
-To use the publisher capabilities it is required to "import our gem" at the desired class, create an instance of the Publisher class and call the publish method on it. See the example below:
+To use the publisher capabilities it is required to "import our gem" at the
+desired class, create an instance of the Publisher class and call the publish
+method on it. See the example below:
 
 ```ruby
 require "pipefy_message"
@@ -57,7 +61,10 @@ end
 
 ### Consumer
 
-To use the consumer capabilities it is required to "import our gem" at your consumer class, include the abstraction, define the `perform` method and finally call the method `process_message` on the consumer class (not an instance of it) to start the consuming process, see the example below:
+To use the consumer capabilities it is required to "import our gem" at your
+consumer class, include the abstraction, define the `perform` method and finally
+call the method `process_message` on the consumer class (not an instance of it)
+to start the consuming process, see the example below:
 
 ```ruby
 require "pipefy_message"
@@ -76,6 +83,7 @@ end
 ```
 
 ### Start PipefyMessages Consumer
+
 To start `consumer` inside a Rails applications:
 
 ```shell
@@ -84,12 +92,16 @@ bundle exec pipefymessage -w ConsumerExampleClass -R
 
 ### Development - Test
 
-To test changes without installing this dependency on your application, on your terminal go to the project root and execute:
+Run `make help` to see a list of all Make targets to help in common development
+activities.
 
-> **:information_source: Environment Variables info.**  
->> ENABLE_AWS_CLIENT_CONFIG is used to allow us to connect in the localstack service instead AWS
+To test changes without installing this dependency on your application, on your
+terminal go to the project root and execute:
+
+> **:information_source: Environment Variables info.**
+>> ENABLE_AWS_CLIENT_CONFIG allows connection to localstack in lieu of AWS
 > 
->> ASYNC_APP_ENV is used to specify the environment and handle some actions/adjustments on each one like protocol, queue name, and so on
+>> ASYNC_APP_ENV specifies the current environment (staging|development)
 
 ```shell
   export ENABLE_AWS_CLIENT_CONFIG="true"
@@ -142,7 +154,9 @@ On the irb console:
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/pipefy/pipefy_message.
+Bug reports and pull requests are welcome on GitHub at
+https://github.com/pipefy/pipefy_message.
 
-> Follow the [template](https://github.com/pipefy/pipefy_message/blob/main/.github/pull_request_template.md) while opening a PR
-
+> Follow the
+  [template](https://github.com/pipefy/pipefy_message/blob/main/.github/pull_request_template.md)
+  while opening a PR
