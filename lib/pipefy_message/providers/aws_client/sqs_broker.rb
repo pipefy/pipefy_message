@@ -39,10 +39,15 @@ module PipefyMessage
             logger.debug(build_log_hash("Message received by SQS poller on queue #{@queue_url}"))
 
             payload = JSON.parse(received_message.body)
-            yield(payload, received_message.message_attributes)
-
+            metadata = received_message.message_attributes.merge(received_message.attributes)
+            yield(payload, metadata)
           rescue StandardError => e
-            raise PipefyMessage::Providers::Errors::ResourceError, e.message
+            # error in the routine, skip delete to try the message again later with 30sec of delay
+            logger.error("Failed to process message, details #{e.inspect}")
+
+            throw e if e.instance_of?(NameError)
+
+            throw :skip_delete
           end
         end
 
