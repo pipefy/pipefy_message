@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+$stdout = STDOUT
+$stdout.sync = true
+
 require "rubygems"
 require "singleton"
 require "thor"
@@ -15,6 +18,7 @@ module PipefyMessage
     method_option :rails, aliases: "-R", type: :boolean, desc: "Load Rails", default: false
     method_option :pidfile, aliases: "-P", type: :string, desc: "Path to pidfile"
     def start
+      puts "Starting PipefyMessage Consumer"
       PipefyMessage::Runner.instance.write_pid(options) if options[:pidfile]
       PipefyMessage::Runner.instance.initialize_rails if options[:rails]
       PipefyMessage::Runner.instance.run(options[:worker]) if options[:worker]
@@ -35,6 +39,8 @@ module PipefyMessage
         require File.expand_path("config/application.rb")
         require File.expand_path("config/environment.rb")
       end
+
+      puts "Booted Rails #{::Rails.version} application in #{ ENV["RAILS_ENV"]} environment" 
     end
 
     def write_pid(options)
@@ -44,7 +50,12 @@ module PipefyMessage
     end
 
     def run(worker)
-      worker.constantize.process_message
+      begin
+        worker.constantize.process_message 
+      rescue Interrupt
+        puts "Shutting down"
+        exit(0)
+      end
     end
   end
 end

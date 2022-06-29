@@ -14,6 +14,7 @@ gem "rake", "~> 13.0"
 group :development, :test do
   gem "pry"
   gem "pry-doc"
+  gem 'pry-byebug'
   gem "rspec", "~> 3.0"
   gem "rubocop", "~> 1.21"
   gem "solargraph"
