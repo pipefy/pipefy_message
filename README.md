@@ -95,6 +95,12 @@ bundle exec pipefymessage -w ConsumerExampleClass -R
 Run `make help` to see a list of all Make targets to help in common development
 activities.
 
+To avoid the management of multiple Ruby versions installations or in case of
+problems to install Ruby 2.x, you can use an isolated container for development:
+```shell
+  make run-dev-env
+```
+
 To test changes without installing this dependency on your application, on your
 terminal go to the project root and execute:
 
