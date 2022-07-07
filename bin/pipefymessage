@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-$stdout = STDOUT
-$stdout.sync = true
-
 require "rubygems"
 require "singleton"
 require "thor"

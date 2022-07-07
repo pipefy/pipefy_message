@@ -30,7 +30,7 @@ module PipefyMessage
     def self.logger_setup
       Logger.new($stdout).tap do |logger|
         logger.level = LOG_LEVELS.index(ENV.fetch("ASYNC_LOG_LEVEL", "INFO")) || Logger::ERROR
-
+        logger.sync = true
         logger.formatter = proc do |severity, datetime, progname, msg|
           { date: datetime.to_s,
             level: severity.to_s,
