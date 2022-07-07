@@ -29,8 +29,9 @@ module PipefyMessage
     # Configuration for a logger created by the Ruby logger gem.
     def self.logger_setup
       Logger.new($stdout).tap do |logger|
-        logger.level = LOG_LEVELS.index(ENV.fetch("ASYNC_LOG_LEVEL", "INFO")) || Logger::ERROR
-        logger.sync = true
+        log_level = LOG_LEVELS.index(ENV.fetch("ASYNC_LOG_LEVEL", "INFO")) || Logger::ERROR
+        puts "The current log level is #{log_level}"
+        logger.level = log_level
         logger.formatter = proc do |severity, datetime, progname, msg|
           { date: datetime.to_s,
             level: severity.to_s,
