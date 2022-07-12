@@ -66,12 +66,12 @@ module PipefyMessage
       # from which the call to process_message was made (see perform
       # method in the parent module).
       def process_message
-        start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
         obj = new
 
         logger.info({ message_text: "Calling consumer poller" })
 
         build_consumer_instance.poller do |payload, metadata|
+          start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
           logger.info({
                         message_text: "Message received by poller to be processed by consumer",
                         received_message: payload,
