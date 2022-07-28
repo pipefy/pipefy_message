@@ -28,14 +28,17 @@ module PipefyMessage
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
-        def publish(payload, topic_name, context = nil)
+        def publish(payload, topic_name, context = nil, cid = nil)
           context = "NO_CONTEXT_PROVIDED" if context.nil?
+          cid = SecureRandom.uuid.to_s if cid.nil?
+
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
           logger.info(
-            { topic_arn: topic_arn,
+            { cid: cid,
+              topic_arn: topic_arn,
               payload: payload,
               message_text: "Attempting to publish a json message to topic #{topic_arn}" }
           )
@@ -44,7 +47,7 @@ module PipefyMessage
                                    message_attributes: {
                                      "correlationId" => {
                                        data_type: "String",
-                                       string_value: SecureRandom.uuid.to_s
+                                       string_value: cid
                                      },
                                      "context" => {
                                        data_type: "String",
@@ -53,15 +56,17 @@ module PipefyMessage
                                    } })
 
           logger.info(
-            { topic_arn: topic_arn,
-              id: result.message_id,
+            { cid: cid,
+              topic_arn: topic_arn,
+              message_id: result.message_id,
               message_text: "Message published with ID #{result.message_id}" }
           )
 
           result
         rescue StandardError => e
           logger.error(
-            { topic_arn: topic_arn,
+            { cid: cid,
+              topic_arn: topic_arn,
               message_text: "Failed to publish message",
               error_details: e.inspect }
           )
