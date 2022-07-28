@@ -72,7 +72,11 @@ module PipefyMessage
 
         build_consumer_instance.poller do |payload, metadata|
           start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
+
+          cid = metadata["correlationId"]
+
           logger.info({
+                        cid: cid,
                         message_text: "Message received by poller to be processed by consumer",
                         received_message: payload,
                         metadata: metadata
@@ -83,13 +87,20 @@ module PipefyMessage
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info({
+                        cid: cid,
                         duration_ms: elapsed_time_ms,
                         message_text: "Message received by consumer poller, processed " \
                                       "in #{elapsed_time_ms} milliseconds"
                       })
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e
-        logger.error("Failed to process message, details #{e.inspect}")
+        cid = "NO_CID_RETRIEVED" unless defined? cid
+        # this shows up in multiple places; OK or DRY up?
+
+        logger.error({
+                       cid: cid,
+                       message_text: "Failed to process message, details #{e.inspect}"
+                     })
         raise e
       end
     end

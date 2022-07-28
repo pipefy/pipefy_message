@@ -43,7 +43,8 @@ module PipefyMessage
               message_text: "Attempting to publish a json message to topic #{topic_arn}" }
           )
 
-          result = topic.publish({ message: message.to_json, message_structure: " json ",
+          result = topic.publish({ message: message.to_json,
+                                   message_structure: " json ",
                                    message_attributes: {
                                      "correlationId" => {
                                        data_type: "String",
@@ -64,6 +65,9 @@ module PipefyMessage
 
           result
         rescue StandardError => e
+          cid = "NO_CID_RETRIEVED" unless defined? cid
+          # this shows up in multiple places; OK or DRY up?
+
           logger.error(
             { cid: cid,
               topic_arn: topic_arn,

@@ -32,18 +32,37 @@ module PipefyMessage
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.info(build_log_hash("Initiating SQS polling on queue #{@queue_url}"))
+          logger.info(merge_log_hash({
+                                       message_text: "Initiating SQS polling on queue #{@queue_url}"
+                                     }))
 
           @poller.poll({ wait_time_seconds: @config[:wait_time_seconds],
                          message_attribute_names: ["All"], attribute_names: ["All"] }) do |received_message|
-            logger.debug(build_log_hash("Message received by SQS poller on queue #{@queue_url}"))
-
             payload = JSON.parse(received_message.body)
             metadata = received_message.message_attributes.merge(received_message.attributes)
+
+            cid = metadata["correlationId"]
+
+            logger.debug(
+              merge_log_hash({
+                               cid: cid,
+                               message_text: "Message received by SQS poller on queue #{@queue_url}"
+                             })
+            )
+
             yield(payload, metadata)
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
-            logger.error("Failed to process message, details #{e.inspect}")
+
+            cid = "NO_CID_RETRIEVED" unless defined? cid
+            # this shows up in multiple places; OK or DRY up?
+
+            logger.error(
+              merge_log_hash({
+                               cid: cid,
+                               message_text: "Failed to process message, details #{e.inspect}"
+                             })
+            )
 
             throw e if e.instance_of?(NameError)
 
@@ -62,8 +81,8 @@ module PipefyMessage
 
         ##
         # Adds the queue name to logs, if not already present.
-        def build_log_hash(arg)
-          { queue_name: @config[:queue_name], message_text: arg }
+        def merge_log_hash(log_hash)
+          { queue_name: @config[:queue_name] }.merge(log_hash)
         end
 
         ##
