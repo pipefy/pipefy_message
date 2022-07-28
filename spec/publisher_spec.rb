@@ -3,7 +3,7 @@
 require_relative "../lib/pipefy_message/providers/aws_client/sns_broker"
 
 class TestBroker
-  def publish(message, topic, context = nil); end
+  def publish(message, topic, context = nil, cid = nil); end
 end
 
 RSpec.describe PipefyMessage::Publisher do
@@ -21,7 +21,7 @@ RSpec.describe PipefyMessage::Publisher do
     topic_name = "pipefy-local-topic"
     publisher.publish(payload, topic_name)
 
-    expect(test_broker).to have_received(:publish).with(payload, topic_name, nil)
+    expect(test_broker).to have_received(:publish).with(payload, topic_name, nil, nil)
   end
 
   context "when I try to publish a message to SNS broker" do
@@ -60,7 +60,7 @@ RSpec.describe PipefyMessage::Publisher do
       topic_name = "pipefy-local-topic"
       result = publisher.publish(payload, topic_name)
       expect(result).to eq mocked_return
-      expect(mocked_publisher_impl).to have_received(:publish).with(payload, topic_name, nil)
+      expect(mocked_publisher_impl).to have_received(:publish).with(payload, topic_name, nil, nil)
     end
   end
 end
