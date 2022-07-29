@@ -28,16 +28,16 @@ module PipefyMessage
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
-        def publish(payload, topic_name, context = nil, cid = nil)
+        def publish(payload, topic_name, context = nil, correlation_id = nil)
           context = "NO_CONTEXT_PROVIDED" if context.nil?
-          cid = SecureRandom.uuid.to_s if cid.nil?
+          correlation_id = SecureRandom.uuid.to_s if correlation_id.nil?
 
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
           logger.info(
-            { cid: cid,
+            { correlation_id: correlation_id,
               topic_arn: topic_arn,
               payload: payload,
               message_text: "Attempting to publish a json message to topic #{topic_arn}" }
@@ -48,7 +48,7 @@ module PipefyMessage
                                    message_attributes: {
                                      "correlationId" => {
                                        data_type: "String",
-                                       string_value: cid
+                                       string_value: correlation_id
                                      },
                                      "context" => {
                                        data_type: "String",
@@ -57,7 +57,7 @@ module PipefyMessage
                                    } })
 
           logger.info(
-            { cid: cid,
+            { correlation_id: correlation_id,
               topic_arn: topic_arn,
               message_id: result.message_id,
               message_text: "Message published with ID #{result.message_id}" }
@@ -65,11 +65,11 @@ module PipefyMessage
 
           result
         rescue StandardError => e
-          cid = "NO_CID_RETRIEVED" unless defined? cid
+          correlation_id = "NO_correlation_id_RETRIEVED" unless defined? correlation_id
           # this shows up in multiple places; OK or DRY up?
 
           logger.error(
-            { cid: cid,
+            { correlation_id: correlation_id,
               topic_arn: topic_arn,
               message_text: "Failed to publish message",
               error_details: e.inspect }

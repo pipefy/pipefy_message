@@ -41,11 +41,11 @@ module PipefyMessage
             payload = JSON.parse(received_message.body)
             metadata = received_message.message_attributes.merge(received_message.attributes)
 
-            cid = metadata["correlationId"]
+            correlation_id = metadata["correlationId"]
 
             logger.debug(
               merge_log_hash({
-                               cid: cid,
+                               correlation_id: correlation_id,
                                message_text: "Message received by SQS poller on queue #{@queue_url}"
                              })
             )
@@ -54,12 +54,12 @@ module PipefyMessage
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
 
-            cid = "NO_CID_RETRIEVED" unless defined? cid
+            correlation_id = "NO_correlation_id_RETRIEVED" unless defined? correlation_id
             # this shows up in multiple places; OK or DRY up?
 
             logger.error(
               merge_log_hash({
-                               cid: cid,
+                               correlation_id: correlation_id,
                                message_text: "Failed to process message, details #{e.inspect}"
                              })
             )

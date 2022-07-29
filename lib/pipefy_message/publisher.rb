@@ -14,8 +14,8 @@ module PipefyMessage
       @publisher_instance = build_publisher_instance
     end
 
-    def publish(message, topic, context = nil, cid = nil)
-      @publisher_instance.publish(message, topic, context, cid)
+    def publish(message, topic, context = nil, correlation_id = nil)
+      @publisher_instance.publish(message, topic, context, correlation_id)
     end
 
     private

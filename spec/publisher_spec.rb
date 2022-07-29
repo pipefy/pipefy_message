@@ -3,7 +3,7 @@
 require_relative "../lib/pipefy_message/providers/aws_client/sns_broker"
 
 class TestBroker
-  def publish(message, topic, context = nil, cid = nil); end
+  def publish(message, topic, context = nil, correlation_id = nil); end
 end
 
 RSpec.describe PipefyMessage::Publisher do
