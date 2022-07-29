@@ -17,13 +17,18 @@ module PipefyMessage
           AwsClient.aws_setup
 
           @sqs = Aws::SQS::Client.new
-          logger.debug({ message_text: "SQS client created" })
+
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
 
           @queue_url = handle_queue_protocol(@sqs.get_queue_url({ queue_name: handle_queue_name(@config[:queue_name]) })
                                                  .queue_url)
 
           @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
+
+          logger.debug({
+                         queue_url: @queue_url,
+                         message_text: "SQS client created"
+                       })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
@@ -42,11 +47,18 @@ module PipefyMessage
             metadata = received_message.message_attributes.merge(received_message.attributes)
 
             correlation_id = metadata["correlationId"]
+            event_id = metadata["eventId"]
+            # We're extracting those again in the consumer
+            # process_message module. I considered whether these
+            # should perhaps be `yield`ed instead, but I guess
+            # this is not the bad kind of repetition.
 
             logger.debug(
               merge_log_hash({
                                correlation_id: correlation_id,
-                               message_text: "Message received by SQS poller on queue #{@queue_url}"
+                               event_id: event_id,
+                               queue_url: @queue_url,
+                               message_text: "Message received by SQS poller"
                              })
             )
 
@@ -54,13 +66,16 @@ module PipefyMessage
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
 
-            correlation_id = "NO_correlation_id_RETRIEVED" unless defined? correlation_id
+            correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
+            event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
             # this shows up in multiple places; OK or DRY up?
 
             logger.error(
               merge_log_hash({
                                correlation_id: correlation_id,
-                               message_text: "Failed to process message, details #{e.inspect}"
+                               event_id: event_id,
+                               queue_url: @queue_url,
+                               message_text: "Failed to consume message; details: #{e.inspect}"
                              })
             )
 

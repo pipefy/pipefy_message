@@ -74,9 +74,11 @@ module PipefyMessage
           start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
 
           correlation_id = metadata["correlationId"]
+          event_id = metadata["eventId"]
 
           logger.info({
                         correlation_id: correlation_id,
+                        event_id: event_id,
                         message_text: "Message received by poller to be processed by consumer",
                         received_message: payload,
                         metadata: metadata
@@ -88,18 +90,21 @@ module PipefyMessage
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info({
                         correlation_id: correlation_id,
+                        event_id: event_id,
                         duration_ms: elapsed_time_ms,
                         message_text: "Message received by consumer poller, processed " \
                                       "in #{elapsed_time_ms} milliseconds"
                       })
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e
-        correlation_id = "NO_correlation_id_RETRIEVED" unless defined? correlation_id
+        correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
+        event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
         # this shows up in multiple places; OK or DRY up?
 
         logger.error({
                        correlation_id: correlation_id,
-                       message_text: "Failed to process message, details #{e.inspect}"
+                       event_id: event_id,
+                       message_text: "Failed to process message; details: #{e.inspect}"
                      })
         raise e
       end

@@ -55,7 +55,9 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SnsBroker do
       expected_payload = { message: "{\"default\":{\"foo\":\"bar\"}}",
                            message_attributes: { "context" => { data_type: "String",
                                                                 string_value: "NO_CONTEXT_PROVIDED" },
-                                                 "correlationId" =>
+                                                 "correlationId" => { data_type: "String",
+                                                                      string_value: "NO_CID_PROVIDED" },
+                                                 "eventId" =>
                                    { data_type: "String",
                                      string_value: "15075c9d-7337-4f70-be02-2732aff2c2f7" } },
                            message_structure: " json " }

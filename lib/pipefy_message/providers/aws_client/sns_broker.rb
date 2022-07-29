@@ -30,7 +30,8 @@ module PipefyMessage
         # with topic_name.
         def publish(payload, topic_name, context = nil, correlation_id = nil)
           context = "NO_CONTEXT_PROVIDED" if context.nil?
-          correlation_id = SecureRandom.uuid.to_s if correlation_id.nil?
+          correlation_id = "NO_CID_PROVIDED" if correlation_id.nil?
+          event_id = SecureRandom.uuid.to_s
 
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
@@ -38,6 +39,7 @@ module PipefyMessage
 
           logger.info(
             { correlation_id: correlation_id,
+              event_id: event_id,
               topic_arn: topic_arn,
               payload: payload,
               message_text: "Attempting to publish a json message to topic #{topic_arn}" }
@@ -50,6 +52,10 @@ module PipefyMessage
                                        data_type: "String",
                                        string_value: correlation_id
                                      },
+                                     "eventId" => {
+                                       data_type: "String",
+                                       string_value: event_id
+                                     },
                                      "context" => {
                                        data_type: "String",
                                        string_value: context
@@ -58,18 +64,21 @@ module PipefyMessage
 
           logger.info(
             { correlation_id: correlation_id,
+              event_id: event_id,
               topic_arn: topic_arn,
               message_id: result.message_id,
-              message_text: "Message published with ID #{result.message_id}" }
+              message_text: "Message published" }
           )
 
           result
         rescue StandardError => e
-          correlation_id = "NO_correlation_id_RETRIEVED" unless defined? correlation_id
+          correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
+          event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
           # this shows up in multiple places; OK or DRY up?
 
           logger.error(
             { correlation_id: correlation_id,
+              event_id: event_id,
               topic_arn: topic_arn,
               message_text: "Failed to publish message",
               error_details: e.inspect }
