@@ -47,5 +47,17 @@ module PipefyMessage
     def self.included(base)
       base.extend(self)
     end
+
+    ##
+    # Adds context, correlation and event identifiers to logs. Should be
+    # called with the hash containing the remainder of the logs as
+    # argument, eg: logger.info(log_context({ ... }, context, correlation_id, event_id)).
+    def log_context(log_hash, context, correlation_id, event_id)
+      {
+        context: context,
+        correlation_id: correlation_id,
+        event_id: event_id
+      }.merge(log_hash)
+    end
   end
 end

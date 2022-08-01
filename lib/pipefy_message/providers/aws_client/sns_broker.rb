@@ -33,13 +33,14 @@ module PipefyMessage
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          logger.info(
-            { correlation_id: correlation_id,
-              event_id: event_id,
-              topic_arn: topic_arn,
-              payload: payload,
-              message_text: "Attempting to publish a json message to topic #{topic_arn}" }
-          )
+          logger.info(log_context(
+                        {
+                          topic_arn: topic_arn,
+                          payload: payload,
+                          message_text: "Attempting to publish a json message to topic #{topic_arn}"
+                        },
+                        context, correlation_id, event_id
+                      ))
 
           result = topic.publish({ message: message.to_json,
                                    message_structure: " json ",
@@ -58,27 +59,30 @@ module PipefyMessage
                                      }
                                    } })
 
-          logger.info(
-            { correlation_id: correlation_id,
-              event_id: event_id,
-              topic_arn: topic_arn,
-              message_id: result.message_id,
-              message_text: "Message published" }
-          )
+          logger.info(log_context(
+                        {
+                          topic_arn: topic_arn,
+                          message_id: result.message_id,
+                          message_text: "Message published"
+                        },
+                        context, correlation_id, event_id
+                      ))
 
           result
         rescue StandardError => e
+          context = "NO_CONTEXT_RETRIEVED" unless defined? context
           correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
           event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
           # this shows up in multiple places; OK or DRY up?
 
-          logger.error(
-            { correlation_id: correlation_id,
-              event_id: event_id,
-              topic_arn: topic_arn,
-              message_text: "Failed to publish message",
-              error_details: e.inspect }
-          )
+          logger.error(log_context(
+                         {
+                           topic_arn: topic_arn,
+                           message_text: "Failed to publish message",
+                           error_details: e.inspect
+                         },
+                         context, correlation_id, event_id
+                       ))
         end
 
         private

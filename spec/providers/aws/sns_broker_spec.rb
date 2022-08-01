@@ -56,7 +56,6 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SnsBroker do
       allow(sns_client_mock).to receive(:topic).and_return(sns_topic_mock)
 
       subject.instance_variable_set(:@sns, sns_client_mock)
-      # 
 
       call_publish
 
@@ -64,7 +63,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SnsBroker do
                            message_attributes: { "context" => { data_type: "String",
                                                                 string_value: context },
                                                  "correlationId" => { data_type: "String",
-                                                                      string_value: cid},
+                                                                      string_value: cid },
                                                  "eventId" =>
                                    { data_type: "String",
                                      string_value: event_id } },

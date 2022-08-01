@@ -46,6 +46,7 @@ module PipefyMessage
             payload = JSON.parse(received_message.body)
             metadata = received_message.message_attributes.merge(received_message.attributes)
 
+            context = metadata["context"]
             correlation_id = metadata["correlationId"]
             event_id = metadata["eventId"]
             # We're extracting those again in the consumer
@@ -54,29 +55,25 @@ module PipefyMessage
             # this is not the bad kind of repetition.
 
             logger.debug(
-              merge_log_hash({
-                               correlation_id: correlation_id,
-                               event_id: event_id,
-                               queue_url: @queue_url,
-                               message_text: "Message received by SQS poller"
-                             })
+              merge_log_hash(log_context({
+                                           message_text: "Message received by SQS poller"
+                                         }, context, correlation_id, event_id))
             )
 
             yield(payload, metadata)
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
 
+            context = "NO_CONTEXT_RETRIEVED" unless defined? context
             correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
             event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
             # this shows up in multiple places; OK or DRY up?
 
             logger.error(
-              merge_log_hash({
-                               correlation_id: correlation_id,
-                               event_id: event_id,
-                               queue_url: @queue_url,
-                               message_text: "Failed to consume message; details: #{e.inspect}"
-                             })
+              merge_log_hash(log_context({
+                                           queue_url: @queue_url,
+                                           message_text: "Failed to consume message; details: #{e.inspect}"
+                                         }, context, correlation_id, event_id))
             )
 
             throw e if e.instance_of?(NameError)
