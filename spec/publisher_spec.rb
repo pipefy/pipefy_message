@@ -3,10 +3,25 @@
 require_relative "../lib/pipefy_message/providers/aws_client/sns_broker"
 
 class TestBroker
-  def publish(message, topic, context = nil, correlation_id = nil); end
+  def publish(message, topic, context, correlation_id, event_id); end
 end
 
 RSpec.describe PipefyMessage::Publisher do
+  let(:payload) { { foo: "bar" } }
+  let(:topic_name) { "pipefy-local-topic" }
+  let(:context) { "NO_CONTEXT_PROVIDED" }
+  let(:cid) { "NO_CID_PROVIDED" }
+  let(:event_id) { "15075c9d-7337-4f70-be02-2732aff2c2f7" }
+
+  let(:call_publish) do
+    subject.publish(
+      payload,
+      topic_name,
+      context,
+      cid
+    )
+  end
+
   it "forwards the message to be published by an instance" do
     test_broker = instance_double("TestBroker")
     allow(test_broker).to receive(:publish)
@@ -15,13 +30,11 @@ RSpec.describe PipefyMessage::Publisher do
       .to receive(:build_publisher_instance)
       .and_return(test_broker)
 
-    publisher = described_class.new
+    allow(SecureRandom).to receive(:uuid).and_return("15075c9d-7337-4f70-be02-2732aff2c2f7")
 
-    payload = { foo: "bar" }
-    topic_name = "pipefy-local-topic"
-    publisher.publish(payload, topic_name)
+    call_publish
 
-    expect(test_broker).to have_received(:publish).with(payload, topic_name, nil, nil)
+    expect(test_broker).to have_received(:publish).with(payload, topic_name, context, cid, event_id)
   end
 
   context "when I try to publish a message to SNS broker" do
@@ -54,13 +67,11 @@ RSpec.describe PipefyMessage::Publisher do
         .to receive(:build_publisher_instance)
         .and_return(mocked_publisher_impl)
 
-      publisher = described_class.new
+      allow(SecureRandom).to receive(:uuid).and_return("15075c9d-7337-4f70-be02-2732aff2c2f7")
 
-      payload = { foo: "bar" }
-      topic_name = "pipefy-local-topic"
-      result = publisher.publish(payload, topic_name)
+      result = call_publish
       expect(result).to eq mocked_return
-      expect(mocked_publisher_impl).to have_received(:publish).with(payload, topic_name, nil, nil)
+      expect(mocked_publisher_impl).to have_received(:publish).with(payload, topic_name, context, cid, event_id)
     end
   end
 end

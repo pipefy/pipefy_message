@@ -15,7 +15,11 @@ module PipefyMessage
     end
 
     def publish(message, topic, context = nil, correlation_id = nil)
-      @publisher_instance.publish(message, topic, context, correlation_id)
+      context = "NO_CONTEXT_PROVIDED" if context.nil?
+      correlation_id = "NO_CID_PROVIDED" if correlation_id.nil?
+      event_id = SecureRandom.uuid.to_s
+
+      @publisher_instance.publish(message, topic, context, correlation_id, event_id)
     end
 
     private
