@@ -84,7 +84,7 @@ module PipefyMessage
                                   }, context, correlation_id, event_id))
 
           retry_count = metadata["ApproximateReceiveCount"].to_i - 1
-          obj.perform(payload["Message"], { retry_count: retry_count })
+          obj.perform(payload["Message"], { retry_count: retry_count, correlation_id: correlation_id })
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info(log_context({
