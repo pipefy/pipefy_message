@@ -11,6 +11,5 @@ class MyAwesomeConsumer
   def perform(message, metadata)
     puts "Received message #{message} from broker - retry #{metadata[:retry_count]}"
     ## Fill with our logic here
-    raise StandardError
   end
 end

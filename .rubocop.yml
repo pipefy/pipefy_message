@@ -19,7 +19,14 @@ Metrics/BlockLength:
 Lint/MissingSuper:
   Enabled: false
 
+# Essentially, logs are making methods and blocks huge, not the
+# logic itself. We thus decided to disable some linter checks
+# related to number of lines.
+
 Metrics/MethodLength:
+  Enabled: false
+
+Metrics/BlockLength:
   Enabled: false
 
 Metrics/AbcSize:

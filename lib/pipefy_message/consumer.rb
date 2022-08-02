@@ -72,24 +72,36 @@ module PipefyMessage
 
         build_consumer_instance.poller do |payload, metadata|
           start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
-          logger.info({
-                        message_text: "Message received by poller to be processed by consumer",
-                        received_message: payload,
-                        metadata: metadata
-                      })
+
+          context = metadata["context"]
+          correlation_id = metadata["correlationId"]
+          event_id = metadata["eventId"]
+
+          logger.info(log_context({
+                                    message_text: "Message received by poller to be processed by consumer",
+                                    received_message: payload,
+                                    metadata: metadata
+                                  }, context, correlation_id, event_id))
 
           retry_count = metadata["ApproximateReceiveCount"].to_i - 1
           obj.perform(payload["Message"], { retry_count: retry_count })
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
-          logger.info({
-                        duration_ms: elapsed_time_ms,
-                        message_text: "Message received by consumer poller, processed " \
-                                      "in #{elapsed_time_ms} milliseconds"
-                      })
+          logger.info(log_context({
+                                    duration_ms: elapsed_time_ms,
+                                    message_text: "Message received by consumer poller, processed " \
+                                                  "in #{elapsed_time_ms} milliseconds"
+                                  }, context, correlation_id, event_id))
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e
-        logger.error("Failed to process message, details #{e.inspect}")
+        context = "NO_CONTEXT_RETRIEVED" unless defined? context
+        correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
+        event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
+        # this shows up in multiple places; OK or DRY up?
+
+        logger.error(log_context({
+                                   message_text: "Failed to process message; details: #{e.inspect}"
+                                 }, context, correlation_id, event_id))
         raise e
       end
     end

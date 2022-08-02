@@ -28,23 +28,30 @@ module PipefyMessage
         ##
         # Publishes a message with the given payload to the SNS topic
         # with topic_name.
-        def publish(payload, topic_name, context = nil)
-          context = "NO_CONTEXT_PROVIDED" if context.nil?
+        def publish(payload, topic_name, context, correlation_id, event_id)
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
           topic = @sns.topic(topic_arn)
 
-          logger.info(
-            { topic_arn: topic_arn,
-              payload: payload,
-              message_text: "Attempting to publish a json message to topic #{topic_arn}" }
-          )
+          logger.info(log_context(
+                        {
+                          topic_arn: topic_arn,
+                          payload: payload,
+                          message_text: "Attempting to publish a json message to topic #{topic_arn}"
+                        },
+                        context, correlation_id, event_id
+                      ))
 
-          result = topic.publish({ message: message.to_json, message_structure: " json ",
+          result = topic.publish({ message: message.to_json,
+                                   message_structure: " json ",
                                    message_attributes: {
                                      "correlationId" => {
                                        data_type: "String",
-                                       string_value: SecureRandom.uuid.to_s
+                                       string_value: correlation_id
+                                     },
+                                     "eventId" => {
+                                       data_type: "String",
+                                       string_value: event_id
                                      },
                                      "context" => {
                                        data_type: "String",
@@ -52,19 +59,30 @@ module PipefyMessage
                                      }
                                    } })
 
-          logger.info(
-            { topic_arn: topic_arn,
-              id: result.message_id,
-              message_text: "Message published with ID #{result.message_id}" }
-          )
+          logger.info(log_context(
+                        {
+                          topic_arn: topic_arn,
+                          message_id: result.message_id,
+                          message_text: "Message published"
+                        },
+                        context, correlation_id, event_id
+                      ))
 
           result
         rescue StandardError => e
-          logger.error(
-            { topic_arn: topic_arn,
-              message_text: "Failed to publish message",
-              error_details: e.inspect }
-          )
+          context = "NO_CONTEXT_RETRIEVED" unless defined? context
+          correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
+          event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
+          # this shows up in multiple places; OK or DRY up?
+
+          logger.error(log_context(
+                         {
+                           topic_arn: topic_arn,
+                           message_text: "Failed to publish message",
+                           error_details: e.inspect
+                         },
+                         context, correlation_id, event_id
+                       ))
         end
 
         private
