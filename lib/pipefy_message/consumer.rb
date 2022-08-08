@@ -73,9 +73,9 @@ module PipefyMessage
         build_consumer_instance.poller do |payload, metadata|
           start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
 
-          context = metadata["context"]
-          correlation_id = metadata["correlationId"]
-          event_id = metadata["eventId"]
+          context = metadata[:context]
+          correlation_id = metadata[:correlationId]
+          event_id = metadata[:eventId]
 
           logger.info(log_context({
                                     message_text: "Message received by poller to be processed by consumer",
