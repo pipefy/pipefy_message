@@ -44,11 +44,12 @@ module PipefyMessage
           @poller.poll({ wait_time_seconds: @config[:wait_time_seconds],
                          message_attribute_names: ["All"], attribute_names: ["All"] }) do |received_message|
             payload = JSON.parse(received_message.body)
-            metadata = received_message.message_attributes.merge(received_message.attributes)
+            original_metadata = received_message.message_attributes.merge(received_message.attributes)
 
-            context = metadata["context"]
-            correlation_id = metadata["correlationId"]
-            event_id = metadata["eventId"]
+            metadata = transform_metadata(original_metadata)
+            context = metadata[:context]
+            correlation_id = metadata[:correlationId]
+            event_id = metadata[:eventId]
             # We're extracting those again in the consumer
             # process_message module. I considered whether these
             # should perhaps be `yield`ed instead, but I guess
@@ -105,6 +106,32 @@ module PipefyMessage
 
         def handle_queue_protocol(queue_url)
           ENV["ASYNC_APP_ENV"] == "development" ? queue_url : queue_url.sub(%r{^http://}, "https://")
+        end
+
+        ##
+        # Extracts metadata value according to its type
+        def extract_metadata_value(metadata, key)
+          return nil unless metadata.key? key
+
+          case metadata[key].data_type
+          when "String"
+            metadata[key].string_value
+          when "Binary"
+            metadata[key].binary_value
+          end
+        end
+
+        ##
+        # Transform metadata to a simple hash
+        def transform_metadata(metadata)
+          context = extract_metadata_value(metadata, "context")
+          correlation_id = extract_metadata_value(metadata, "correlationId")
+          event_id = extract_metadata_value(metadata, "eventId")
+          {
+            context: context,
+            correlationId: correlation_id,
+            eventId: event_id
+          }
         end
       end
     end
