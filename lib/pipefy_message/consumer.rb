@@ -91,7 +91,7 @@ module PipefyMessage
           logger.info(log_context({
                                     duration_ms: elapsed_time_ms,
                                     log_text: "Message received by consumer poller, processed " \
-                                                  "in #{elapsed_time_ms} milliseconds"
+                                              "in #{elapsed_time_ms} milliseconds"
                                   }, context, correlation_id, event_id))
         end
       rescue PipefyMessage::Providers::Errors::ResourceError => e
