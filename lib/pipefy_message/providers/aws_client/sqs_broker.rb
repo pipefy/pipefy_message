@@ -46,7 +46,7 @@ module PipefyMessage
             payload = JSON.parse(received_message.body)
             original_metadata = received_message.message_attributes.merge(received_message.attributes)
 
-            metadata = transform_metadata(original_metadata)
+            metadata = transform_metadata(original_metadata, payload)
             context = metadata[:context]
             correlation_id = metadata[:correlationId]
             event_id = metadata[:eventId]
@@ -110,23 +110,30 @@ module PipefyMessage
 
         ##
         # Extracts metadata value according to its type
-        def extract_metadata_value(metadata, key)
-          return nil unless metadata.key? key
+        def extract_metadata_value(metadata, key, body_message_attribute_field)
+          value_from_metadata = if !metadata.empty? && metadata.key?(key)
+                                  case metadata[key].data_type
+                                  when "String"
+                                    metadata[key].string_value
+                                  when "Binary"
+                                    metadata[key].binary_value
+                                  end
+                                end
 
-          case metadata[key].data_type
-          when "String"
-            metadata[key].string_value
-          when "Binary"
-            metadata[key].binary_value
+          if value_from_metadata.nil?
+            body_message_attribute_field.dig(key, "Value")
+          else
+            value_from_metadata
           end
         end
 
         ##
         # Transform metadata to a simple hash
-        def transform_metadata(metadata)
-          context = extract_metadata_value(metadata, "context")
-          correlation_id = extract_metadata_value(metadata, "correlationId")
-          event_id = extract_metadata_value(metadata, "eventId")
+        def transform_metadata(metadata, payload)
+          body_message_attribute_field_normalized = payload["MessageAttributes"] || {}
+          context = extract_metadata_value(metadata, "context", body_message_attribute_field_normalized)
+          correlation_id = extract_metadata_value(metadata, "correlationId", body_message_attribute_field_normalized)
+          event_id = extract_metadata_value(metadata, "eventId", body_message_attribute_field_normalized)
           {
             context: context,
             correlationId: correlation_id,

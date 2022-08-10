@@ -21,7 +21,7 @@ module PipefyMessage
 
           @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000:")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
-        rescue StandardError
+        rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
         end
 
