@@ -35,8 +35,7 @@ module PipefyMessage
           { date: datetime.to_s,
             level: severity.to_s,
             app: progname.to_s,
-            context: "async_processing",
-            message: msg }.to_json + $INPUT_RECORD_SEPARATOR
+            context: "async_processing" }.merge(msg).to_json + $INPUT_RECORD_SEPARATOR
         end
       end
     end
