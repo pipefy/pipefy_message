@@ -68,7 +68,7 @@ module PipefyMessage
       def process_message
         obj = new
 
-        logger.info({ message_text: "Calling consumer poller" })
+        logger.info({ log_text: "Calling consumer poller" })
 
         build_consumer_instance.poller do |payload, metadata|
           start = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
@@ -78,7 +78,7 @@ module PipefyMessage
           event_id = metadata[:eventId]
 
           logger.info(log_context({
-                                    message_text: "Message received by poller to be processed by consumer",
+                                    log_text: "Message received by poller to be processed by consumer",
                                     received_message: payload,
                                     metadata: metadata
                                   }, context, correlation_id, event_id))
@@ -90,7 +90,7 @@ module PipefyMessage
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info(log_context({
                                     duration_ms: elapsed_time_ms,
-                                    message_text: "Message received by consumer poller, processed " \
+                                    log_text: "Message received by consumer poller, processed " \
                                                   "in #{elapsed_time_ms} milliseconds"
                                   }, context, correlation_id, event_id))
         end
@@ -101,7 +101,7 @@ module PipefyMessage
         # this shows up in multiple places; OK or DRY up?
 
         logger.error(log_context({
-                                   message_text: "Failed to process message; details: #{e.inspect}"
+                                   log_text: "Failed to process message; details: #{e.inspect}"
                                  }, context, correlation_id, event_id))
         raise e
       end

@@ -27,7 +27,7 @@ module PipefyMessage
 
           logger.debug({
                          queue_url: @queue_url,
-                         message_text: "SQS client created"
+                         log_text: "SQS client created"
                        })
         rescue StandardError => e
           raise PipefyMessage::Providers::Errors::ResourceError, e.message
@@ -38,7 +38,7 @@ module PipefyMessage
         # in the initial configuration.
         def poller
           logger.info(merge_log_hash({
-                                       message_text: "Initiating SQS polling on queue #{@queue_url}"
+                                       log_text: "Initiating SQS polling on queue #{@queue_url}"
                                      }))
 
           @poller.poll({ wait_time_seconds: @config[:wait_time_seconds],
@@ -57,7 +57,7 @@ module PipefyMessage
 
             logger.debug(
               merge_log_hash(log_context({
-                                           message_text: "Message received by SQS poller"
+                                           log_text: "Message received by SQS poller"
                                          }, context, correlation_id, event_id))
             )
 
@@ -73,7 +73,7 @@ module PipefyMessage
             logger.error(
               merge_log_hash(log_context({
                                            queue_url: @queue_url,
-                                           message_text: "Failed to consume message; details: #{e.inspect}"
+                                           log_text: "Failed to consume message; details: #{e.inspect}"
                                          }, context, correlation_id, event_id))
             )
 

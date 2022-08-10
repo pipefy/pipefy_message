@@ -17,7 +17,7 @@ module PipefyMessage
           AwsClient.aws_setup
 
           @sns = Aws::SNS::Resource.new
-          logger.debug({ message_text: "SNS resource created" })
+          logger.debug({ log_text: "SNS resource created" })
 
           @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000:")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
@@ -37,7 +37,7 @@ module PipefyMessage
                         {
                           topic_arn: topic_arn,
                           payload: payload,
-                          message_text: "Attempting to publish a json message to topic #{topic_arn}"
+                          log_text: "Attempting to publish a json message to topic #{topic_arn}"
                         },
                         context, correlation_id, event_id
                       ))
@@ -63,7 +63,7 @@ module PipefyMessage
                         {
                           topic_arn: topic_arn,
                           message_id: result.message_id,
-                          message_text: "Message published"
+                          log_text: "Message published"
                         },
                         context, correlation_id, event_id
                       ))
@@ -78,7 +78,7 @@ module PipefyMessage
           logger.error(log_context(
                          {
                            topic_arn: topic_arn,
-                           message_text: "Failed to publish message",
+                           log_text: "Failed to publish message",
                            error_details: e.inspect
                          },
                          context, correlation_id, event_id
