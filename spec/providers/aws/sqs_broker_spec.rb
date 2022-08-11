@@ -57,7 +57,17 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   end
 
   describe "#poller" do
-    let(:expected_result) { { "default" => { "foo" => "bar" } }.to_json }
+    let(:eventId) { SecureRandom.hex }
+    let(:correlationId) { SecureRandom.hex }
+    let(:context) { SecureRandom.hex }
+    let(:expected_message_result) { { "default" => { "foo" => "bar" } }.to_json }
+    let(:expected_metadata_result) do
+      {
+        context: context,
+        correlationId: correlationId,
+        eventId: eventId
+      }
+    end
 
     context "Raw Message Delivery disabled" do
       let(:body_json) do
@@ -74,9 +84,9 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
           \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-56e67fcb41f6fec09b0196692625d385.pem\",
           \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic:995474b4-3a57-4c94-abdf-3ba50244723d\",
           \"MessageAttributes\" : {
-            \"eventId\" : {\"Type\":\"String\",\"Value\":\"30043493-d47d-4445-b5f6-17881df4b5f3\"},
-            \"context\" : {\"Type\":\"String\",\"Value\":\"NO_CONTEXT_PROVIDED\"},
-            \"correlationId\" : {\"Type\":\"String\",\"Value\":\"b41daa3fa2f0469eed7fc5b0534f0bc6\"}
+            \"eventId\" : {\"Type\":\"String\",\"Value\":\"#{eventId}\"},
+            \"context\" : {\"Type\":\"String\",\"Value\":\"#{context}\"},
+            \"correlationId\" : {\"Type\":\"String\",\"Value\":\"#{correlationId}\"}
           }
         }
         EOS_BODY
@@ -103,11 +113,10 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         worker = described_class.new
         worker.instance_variable_set(:@poller, mocked_poller)
 
-        result = nil
-        worker.poller do |message|
-          result = message
+        worker.poller do |message, metadata|
+          expect(message).to eq expected_message_result
+          expect(metadata).to eq expected_metadata_result
         end
-        expect(result).to eq expected_result
       end
     end
 
@@ -116,7 +125,21 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         {
           message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
           receipt_handle: "2312dasdas1231221312321adsads",
-          body: "{\"default\":{\"foo\":\"bar\"}}"
+          body: "{\"default\":{\"foo\":\"bar\"}}",
+          message_attributes: {
+            "context" => {
+              data_type: "String",
+              string_value: context
+            },
+            "correlationId" => {
+              data_type: "String",
+              string_value: correlationId
+            },
+            "eventId" => {
+              data_type: "String",
+              string_value: eventId
+            }
+          }
         }
       end
 
@@ -133,11 +156,10 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         worker = described_class.new
         worker.instance_variable_set(:@poller, mocked_poller)
 
-        result = nil
-        worker.poller do |message|
-          result = message
+        worker.poller do |message, metadata|
+          expect(message).to eq expected_message_result
+          expect(metadata).to eq expected_metadata_result
         end
-        expect(result).to eq expected_result
       end
     end
   end
