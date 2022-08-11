@@ -126,10 +126,10 @@ module PipefyMessage
           original_metadata = received_message.message_attributes.merge(received_message.attributes)
           body_as_json = JSON.parse(received_message.body)
 
-          body_message_attribute_field_normalized = body_as_json["MessageAttributes"] || {}
-          context = extract_metadata_value(original_metadata, "context", body_message_attribute_field_normalized)
-          correlation_id = extract_metadata_value(original_metadata, "correlationId", body_message_attribute_field_normalized)
-          event_id = extract_metadata_value(original_metadata, "eventId", body_message_attribute_field_normalized)
+          body_message_attribute = body_as_json["MessageAttributes"] || {}
+          context = extract_metadata_value(original_metadata, "context", body_message_attribute)
+          correlation_id = extract_metadata_value(original_metadata, "correlationId", body_message_attribute)
+          event_id = extract_metadata_value(original_metadata, "eventId", body_message_attribute)
           payload = body_as_json["Message"] || received_message.body
 
           [
