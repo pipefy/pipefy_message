@@ -60,11 +60,33 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
     let(:expected_result) { { "default" => { "foo" => "bar" } }.to_json }
 
     context "Raw Message Delivery disabled" do
+      let(:body_json) do
+        # rubocop:disable Layout/HeredocIndentation
+        <<~EOS_BODY
+        {
+          \"Type\" : \"Notification\",
+          \"MessageId\" : \"6c7057f5-0d43-54ad-a502-0c9a4b6cdcf1\",
+          \"TopicArn\" : \"arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic\",
+          \"Message\" : \"{\\\"default\\\":{\\\"foo\\\":\\\"bar\\\"}}\",
+          \"Timestamp\" : \"2022-08-11T18:01:19.875Z\",
+          \"SignatureVersion\" : \"1\",
+          \"Signature\" : \"GrOeiHuqVV9eB+RAWZ2XYe2ko/KXxnxVhQ/sW8zV3ybgO0UD6BI32XL/mw4r562msXpG0BZc7dFbJG6XPVcQ7YZWnVKU7c34nS9NyTimMTz5Df/raKCdVkxigMhbS45CPMC//u7Sz9fDb/MXTrInnuSVPY14/QwEwXqyV45M+lTzLoBJSM05UX0eo1MOQxRQ8IYgPay5z6BSSHq4B6/59U88PMv4VJLNaWIb8dTiO1ixK9Nz7Xk/dqqC/bI6A+VLUNhVSitDfkDaPPoSG5qFnBPRzpcQhznANkjecW6MSWtCf0R8BuSqAYNxoCzDcC5xOf3zJOccfUTwvxz5f5jwfg==\",
+          \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-56e67fcb41f6fec09b0196692625d385.pem\",
+          \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic:995474b4-3a57-4c94-abdf-3ba50244723d\",
+          \"MessageAttributes\" : {
+            \"eventId\" : {\"Type\":\"String\",\"Value\":\"30043493-d47d-4445-b5f6-17881df4b5f3\"},
+            \"context\" : {\"Type\":\"String\",\"Value\":\"NO_CONTEXT_PROVIDED\"},
+            \"correlationId\" : {\"Type\":\"String\",\"Value\":\"b41daa3fa2f0469eed7fc5b0534f0bc6\"}
+          }
+        }
+        EOS_BODY
+        # rubocop:enable Layout/HeredocIndentation
+      end
       let(:mocked_message) do
         {
           message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
           receipt_handle: "2312dasdas1231221312321adsads",
-          body: "{\n  \"Type\" : \"Notification\",\n  \"MessageId\" : \"6c7057f5-0d43-54ad-a502-0c9a4b6cdcf1\",\n  \"TopicArn\" : \"arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic\",\n  \"Message\" : \"{\\\"default\\\":{\\\"foo\\\":\\\"bar\\\"}}\",\n  \"Timestamp\" : \"2022-08-11T18:01:19.875Z\",\n  \"SignatureVersion\" : \"1\",\n  \"Signature\" : \"GrOeiHuqVV9eB+RAWZ2XYe2ko/KXxnxVhQ/sW8zV3ybgO0UD6BI32XL/mw4r562msXpG0BZc7dFbJG6XPVcQ7YZWnVKU7c34nS9NyTimMTz5Df/raKCdVkxigMhbS45CPMC//u7Sz9fDb/MXTrInnuSVPY14/QwEwXqyV45M+lTzLoBJSM05UX0eo1MOQxRQ8IYgPay5z6BSSHq4B6/59U88PMv4VJLNaWIb8dTiO1ixK9Nz7Xk/dqqC/bI6A+VLUNhVSitDfkDaPPoSG5qFnBPRzpcQhznANkjecW6MSWtCf0R8BuSqAYNxoCzDcC5xOf3zJOccfUTwvxz5f5jwfg==\",\n  \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-56e67fcb41f6fec09b0196692625d385.pem\",\n  \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic:995474b4-3a57-4c94-abdf-3ba50244723d\",\n  \"MessageAttributes\" : {\n    \"eventId\" : {\"Type\":\"String\",\"Value\":\"30043493-d47d-4445-b5f6-17881df4b5f3\"},\n    \"context\" : {\"Type\":\"String\",\"Value\":\"NO_CONTEXT_PROVIDED\"},\n    \"correlationId\" : {\"Type\":\"String\",\"Value\":\"b41daa3fa2f0469eed7fc5b0534f0bc6\"}\n  }\n}"
+          body: body_json
         }
       end
 
