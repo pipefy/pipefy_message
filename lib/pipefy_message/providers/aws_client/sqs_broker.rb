@@ -43,10 +43,7 @@ module PipefyMessage
 
           @poller.poll({ wait_time_seconds: @config[:wait_time_seconds],
                          message_attribute_names: ["All"], attribute_names: ["All"] }) do |received_message|
-            payload = JSON.parse(received_message.body)
-            original_metadata = received_message.message_attributes.merge(received_message.attributes)
-
-            metadata = transform_metadata(original_metadata, payload)
+            metadata, payload = extract_metadata_and_payload(received_message)
             context = metadata[:context]
             correlation_id = metadata[:correlationId]
             event_id = metadata[:eventId]
@@ -60,7 +57,6 @@ module PipefyMessage
                                            message_text: "Message received by SQS poller"
                                          }, context, correlation_id, event_id))
             )
-
             yield(payload, metadata)
           rescue StandardError => e
             # error in the routine, skip delete to try the message again later with 30sec of delay
@@ -120,25 +116,30 @@ module PipefyMessage
                                   end
                                 end
 
-          if value_from_metadata.nil?
-            body_message_attribute_field.dig(key, "Value")
-          else
-            value_from_metadata
-          end
+          value_from_metadata.nil? ? body_message_attribute_field.dig(key, "Value") : value_from_metadata
         end
 
         ##
-        # Transform metadata to a simple hash
-        def transform_metadata(metadata, payload)
-          body_message_attribute_field_normalized = payload["MessageAttributes"] || {}
-          context = extract_metadata_value(metadata, "context", body_message_attribute_field_normalized)
-          correlation_id = extract_metadata_value(metadata, "correlationId", body_message_attribute_field_normalized)
-          event_id = extract_metadata_value(metadata, "eventId", body_message_attribute_field_normalized)
-          {
-            context: context,
-            correlationId: correlation_id,
-            eventId: event_id
-          }
+        # Transform metadata and payload to a simple hash
+        # Also handle differences if `Enable raw message delivery` SQS setting is on/off
+        def extract_metadata_and_payload(received_message)
+          original_metadata = received_message.message_attributes.merge(received_message.attributes)
+          body_as_json = JSON.parse(received_message.body)
+
+          body_message_attribute_field_normalized = body_as_json["MessageAttributes"] || {}
+          context = extract_metadata_value(original_metadata, "context", body_message_attribute_field_normalized)
+          correlation_id = extract_metadata_value(original_metadata, "correlationId", body_message_attribute_field_normalized)
+          event_id = extract_metadata_value(original_metadata, "eventId", body_message_attribute_field_normalized)
+          payload = body_as_json["Message"] || received_message.body
+
+          [
+            {
+              context: context,
+              correlationId: correlation_id,
+              eventId: event_id
+            },
+            payload
+          ]
         end
       end
     end
