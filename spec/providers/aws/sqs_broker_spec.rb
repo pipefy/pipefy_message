@@ -68,6 +68,24 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         eventId: eventId
       }
     end
+    let(:mocked_element) { Aws::SQS::Types::Message.new(mocked_message) }
+    let(:mocked_list) do
+      mocked_list = Aws::Xml::DefaultList.new
+      mocked_list.append(mocked_element)
+      mocked_list
+    end
+    let(:mocked_poller) do
+      mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
+                                                { skip_delete: true })
+      mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
+      mocked_poller.client.stub_responses(:receive_message, messages: mocked_list)
+      mocked_poller
+    end
+    let(:worker) do
+      worker = described_class.new
+      worker.instance_variable_set(:@poller, mocked_poller)
+      worker
+    end
 
     context "Raw Message Delivery disabled" do
       let(:body_json) do
@@ -101,18 +119,6 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       end
 
       it "should consume a message " do
-        mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
-                                                  { skip_delete: true })
-        mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
-
-        mocked_element = Aws::SQS::Types::Message.new(mocked_message)
-        mocked_list = Aws::Xml::DefaultList.new
-        mocked_list.append(mocked_element)
-        mocked_poller.client.stub_responses(:receive_message, messages: mocked_list)
-
-        worker = described_class.new
-        worker.instance_variable_set(:@poller, mocked_poller)
-
         worker.poller do |message, metadata|
           expect(message).to eq expected_message_result
           expect(metadata).to eq expected_metadata_result
@@ -144,18 +150,6 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
       end
 
       it "should consume a message " do
-        mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
-                                                  { skip_delete: true })
-        mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
-
-        mocked_element = Aws::SQS::Types::Message.new(mocked_message)
-        mocked_list = Aws::Xml::DefaultList.new
-        mocked_list.append(mocked_element)
-        mocked_poller.client.stub_responses(:receive_message, messages: mocked_list)
-
-        worker = described_class.new
-        worker.instance_variable_set(:@poller, mocked_poller)
-
         worker.poller do |message, metadata|
           expect(message).to eq expected_message_result
           expect(metadata).to eq expected_metadata_result
