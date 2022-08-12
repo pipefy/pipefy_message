@@ -57,29 +57,104 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   end
 
   describe "#poller" do
-    it "should consume a message" do
-      mocked_message = { message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
-                         receipt_handle: "2312dasdas1231221312321adsads",
-                         body: "{\"Message\": {\"foo\": \"bar\"}}" }
-
+    let(:eventId) { SecureRandom.hex }
+    let(:correlationId) { SecureRandom.hex }
+    let(:context) { SecureRandom.hex }
+    let(:expected_message_result) { { "default" => { "foo" => "bar" } }.to_json }
+    let(:expected_metadata_result) do
+      {
+        context: context,
+        correlationId: correlationId,
+        eventId: eventId
+      }
+    end
+    let(:mocked_element) { Aws::SQS::Types::Message.new(mocked_message) }
+    let(:mocked_list) do
+      mocked_list = Aws::Xml::DefaultList.new
+      mocked_list.append(mocked_element)
+      mocked_list
+    end
+    let(:mocked_poller) do
       mocked_poller = Aws::SQS::QueuePoller.new("http://localhost:4566/000000000000/my_queue",
                                                 { skip_delete: true })
       mocked_poller.before_request { |stats| throw :stop_polling if stats.received_message_count > 0 }
-
-      mocked_element = Aws::SQS::Types::Message.new(mocked_message)
-      mocked_list = Aws::Xml::DefaultList.new
-      mocked_list.append(mocked_element)
       mocked_poller.client.stub_responses(:receive_message, messages: mocked_list)
-
+      mocked_poller
+    end
+    let(:worker) do
       worker = described_class.new
       worker.instance_variable_set(:@poller, mocked_poller)
+      worker
+    end
 
-      result = nil
-      expected_result = { "Message" => { "foo" => "bar" } }
-      worker.poller do |message|
-        result = message
+    context "Raw Message Delivery disabled" do
+      let(:body_json) do
+        # rubocop:disable Layout/HeredocIndentation
+        <<~EOS_BODY
+        {
+          \"Type\" : \"Notification\",
+          \"MessageId\" : \"6c7057f5-0d43-54ad-a502-0c9a4b6cdcf1\",
+          \"TopicArn\" : \"arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic\",
+          \"Message\" : \"{\\\"default\\\":{\\\"foo\\\":\\\"bar\\\"}}\",
+          \"Timestamp\" : \"2022-08-11T18:01:19.875Z\",
+          \"SignatureVersion\" : \"1\",
+          \"Signature\" : \"GrOeiHuqVV9eB+RAWZ2XYe2ko/KXxnxVhQ/sW8zV3ybgO0UD6BI32XL/mw4r562msXpG0BZc7dFbJG6XPVcQ7YZWnVKU7c34nS9NyTimMTz5Df/raKCdVkxigMhbS45CPMC//u7Sz9fDb/MXTrInnuSVPY14/QwEwXqyV45M+lTzLoBJSM05UX0eo1MOQxRQ8IYgPay5z6BSSHq4B6/59U88PMv4VJLNaWIb8dTiO1ixK9Nz7Xk/dqqC/bI6A+VLUNhVSitDfkDaPPoSG5qFnBPRzpcQhznANkjecW6MSWtCf0R8BuSqAYNxoCzDcC5xOf3zJOccfUTwvxz5f5jwfg==\",
+          \"SigningCertURL\" : \"https://sns.us-east-1.amazonaws.com/SimpleNotificationService-56e67fcb41f6fec09b0196692625d385.pem\",
+          \"UnsubscribeURL\" : \"https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:038527119583:core-card-field-value-updated-topic:995474b4-3a57-4c94-abdf-3ba50244723d\",
+          \"MessageAttributes\" : {
+            \"eventId\" : {\"Type\":\"String\",\"Value\":\"#{eventId}\"},
+            \"context\" : {\"Type\":\"String\",\"Value\":\"#{context}\"},
+            \"correlationId\" : {\"Type\":\"String\",\"Value\":\"#{correlationId}\"}
+          }
+        }
+        EOS_BODY
+        # rubocop:enable Layout/HeredocIndentation
       end
-      expect(result).to eq expected_result
+      let(:mocked_message) do
+        {
+          message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
+          receipt_handle: "2312dasdas1231221312321adsads",
+          body: body_json
+        }
+      end
+
+      it "should consume a message " do
+        worker.poller do |message, metadata|
+          expect(message).to eq expected_message_result
+          expect(metadata).to eq expected_metadata_result
+        end
+      end
+    end
+
+    context "Raw Message Delivery enabled" do
+      let(:mocked_message) do
+        {
+          message_id: "44c44782-fee1-6784-d614-43b73c0bda8d",
+          receipt_handle: "2312dasdas1231221312321adsads",
+          body: "{\"default\":{\"foo\":\"bar\"}}",
+          message_attributes: {
+            "context" => {
+              data_type: "String",
+              string_value: context
+            },
+            "correlationId" => {
+              data_type: "String",
+              string_value: correlationId
+            },
+            "eventId" => {
+              data_type: "String",
+              string_value: eventId
+            }
+          }
+        }
+      end
+
+      it "should consume a message " do
+        worker.poller do |message, metadata|
+          expect(message).to eq expected_message_result
+          expect(metadata).to eq expected_metadata_result
+        end
+      end
     end
   end
 
