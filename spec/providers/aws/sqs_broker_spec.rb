@@ -8,8 +8,9 @@ require_relative "aws_stub_context"
 RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   include_context "AWS stub"
 
+  let(:test_queue) { "test-queue" }
+
   describe "#initialize" do
-    let(:test_queue) { "test-queue" }
     let(:sqs_opts) do
       {
         wait_time_seconds: 10, # default (not set)
@@ -42,15 +43,15 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
   end
 
   it "should handle queue name by environment " do
-    [{ env: "staging", expected_queue_name: "test_queue-staging" },
-     { env: "dev", expected_queue_name: "test_queue" },
-     { env: "prod", expected_queue_name: "test_queue" }].each do |obj|
+    [{ env: "staging", expected_queue_name: "#{test_queue}-staging" },
+     { env: "dev", expected_queue_name: test_queue },
+     { env: "prod", expected_queue_name: test_queue }].each do |obj|
       ENV["ASYNC_APP_ENV"] = obj[:env]
       mock_sqs_client = instance_double("Aws::SQS::Client")
       allow(mock_sqs_client).to receive(:get_queue_url).and_return(Aws::SQS::Types::GetQueueUrlResult.new(queue_url: "http://fake/url"))
       allow(Aws::SQS::Client).to receive(:new).and_return(mock_sqs_client)
 
-      described_class.new(queue_name: "test_queue")
+      described_class.new(queue_name: test_queue)
 
       expect(mock_sqs_client).to have_received(:get_queue_url).with({ queue_name: obj[:expected_queue_name] })
     end
@@ -162,7 +163,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
     it "should raise NonExistentQueue" do
       allow_any_instance_of(Aws::SQS::Client)
         .to receive(:get_queue_url)
-        .with({ queue_name: "pipefy-local-queue" })
+        .with({ queue_name: test_queue })
         .and_raise(
           Aws::SQS::Errors::NonExistentQueue.new(
             double(Aws::SQS::Client),
@@ -171,14 +172,13 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         )
 
       expect do
-        described_class.new
-      end.to raise_error(PipefyMessage::Providers::Errors::ResourceError,
-                         /The specified queue my_queue does not exist for this wsdl version/)
+        described_class.new({ queue_name: test_queue })
+      end.to raise_error(PipefyMessage::Providers::Errors::QueueDoesNotExist)
     end
     it "should raise NetworkingError" do
       allow_any_instance_of(Aws::SQS::Client)
         .to receive(:get_queue_url)
-        .with({ queue_name: "pipefy-local-queue" })
+        .with({ queue_name: test_queue })
         .and_raise(
           Seahorse::Client::NetworkingError.new(
             Errno::ECONNREFUSED.new(""),
@@ -187,7 +187,7 @@ RSpec.describe PipefyMessage::Providers::AwsClient::SqsBroker do
         )
 
       expect do
-        described_class.new("my_queue")
+        described_class.new({ queue_name: test_queue })
       end.to raise_error(PipefyMessage::Providers::Errors::ResourceError)
     end
   end
