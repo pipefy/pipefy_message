@@ -25,19 +25,34 @@ module PipefyMessage
 
           @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
 
-          logger.debug({
-                         queue_url: @queue_url,
-                         log_text: "SQS client created"
+          logger.debug(log_queue_info({
+                                        log_text: "SQS client created"
+                                      }))
+        rescue Aws::SQS::Errors::QueueDoesNotExist, Aws::SQS::Errors::NonExistentQueue
+          logger.error({
+                         queue_name: @config[:queue_name],
+                         log_text: "Failed to initialize AWS SQS broker: the specified queue "\
+                                   "(#{@config[:queue_name]}) does not exist"
                        })
+
+          raise PipefyMessage::Providers::Errors::QueueDoesNotExist,
+                "The specified AWS SQS queue #{@config[:queue_name]} does not exist"
         rescue StandardError => e
-          raise PipefyMessage::Providers::Errors::ResourceError, e.message
+          msg = "Failed to initialize AWS SQS broker with #{e.inspect}"
+
+          logger.error({
+                         queue_name: @config[:queue_name],
+                         log_text: msg
+                       })
+
+          raise PipefyMessage::Providers::Errors::ResourceError, msg
         end
 
         ##
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.info(merge_log_hash({
+          logger.info(log_queue_info({
                                        log_text: "Initiating SQS polling on queue #{@queue_url}"
                                      }))
 
@@ -48,30 +63,34 @@ module PipefyMessage
             correlation_id = metadata[:correlationId]
             event_id = metadata[:eventId]
             # We're extracting those again in the consumer
-            # process_message module. I considered whether these
+            # process_message method. I considered whether these
             # should perhaps be `yield`ed instead, but I guess
             # this is not the bad kind of repetition.
 
             logger.debug(
-              merge_log_hash(log_context({
-                                           log_text: "Message received by SQS poller"
-                                         }, context, correlation_id, event_id))
+              log_queue_info(log_context({ received_message: payload,
+                                           received_metadata: metadata,
+                                           log_text: "Message received by SQS poller" },
+                                         context, correlation_id, event_id))
             )
             yield(payload, metadata)
           rescue StandardError => e
+            if defined? received_message
+              # This would probably only be the case if a malformed and
+              # thus unparseable message is received (eg: in case of
+              # breaking changes in SQS)
+
+              logger.error(log_queue_info({
+                                            received_message: received_message,
+                                            log_text: "Consuming received_message failed with #{e.inspect}"
+                                          }))
+            else
+              logger.error(log_queue_info({
+                                            log_text: "SQS polling failed with #{e.inspect}"
+                                          }))
+            end
+
             # error in the routine, skip delete to try the message again later with 30sec of delay
-
-            context = "NO_CONTEXT_RETRIEVED" unless defined? context
-            correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
-            event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
-            # this shows up in multiple places; OK or DRY up?
-
-            logger.error(
-              merge_log_hash(log_context({
-                                           queue_url: @queue_url,
-                                           log_text: "Failed to consume message; details: #{e.inspect}"
-                                         }, context, correlation_id, event_id))
-            )
 
             throw e if e.instance_of?(NameError)
 
@@ -90,8 +109,9 @@ module PipefyMessage
 
         ##
         # Adds the queue name to logs, if not already present.
-        def merge_log_hash(log_hash)
-          { queue_name: @config[:queue_name] }.merge(log_hash)
+        def log_queue_info(log_hash)
+          { queue_name: @config[:queue_name],
+            queue_url: @queue_url }.merge(log_hash)
         end
 
         ##

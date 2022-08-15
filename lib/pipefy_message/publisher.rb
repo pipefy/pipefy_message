@@ -11,7 +11,17 @@ module PipefyMessage
     def initialize(broker = "aws", broker_opts = {})
       @broker = broker
       @broker_opts = broker_opts
-      @publisher_instance = build_publisher_instance
+      begin
+        @publisher_instance = build_publisher_instance
+      rescue StandardError => e
+        logger.error({
+                       broker: broker,
+                       broker_opts: broker_opts,
+                       log_text: "Failed to initialize #{broker} broker with #{e.inspect}"
+                     })
+
+        raise e
+      end
     end
 
     def publish(message, topic, context = nil, correlation_id = nil)
@@ -20,6 +30,14 @@ module PipefyMessage
       event_id = SecureRandom.uuid.to_s
 
       @publisher_instance.publish(message, topic, context, correlation_id, event_id)
+    rescue StandardError => e
+      logger.error(log_context({
+                                 topic_name: topic,
+                                 message: message,
+                                 log_text: "Failed to publish message to topic #{topic} with #{e.inspect}"
+                               }, context, correlation_id, event_id))
+
+      raise e
     end
 
     private
