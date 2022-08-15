@@ -80,12 +80,23 @@ module PipefyMessage
           logger.info(log_context({
                                     log_text: "Message received by poller to be processed by consumer",
                                     received_message: payload,
-                                    metadata: metadata
+                                    received_metadata: metadata
                                   }, context, correlation_id, event_id))
 
           retry_count = metadata["ApproximateReceiveCount"].to_i - 1
-          obj.perform(payload,
-                      { retry_count: retry_count, context: context, correlation_id: correlation_id })
+
+          begin
+            obj.perform(payload,
+                        { retry_count: retry_count, context: context, correlation_id: correlation_id })
+          rescue StandardError => e
+            logger.error(log_context({
+                                       received_message: payload,
+                                       received_metadata: metadata,
+                                       log_text: "Consumer #{obj.name}.perform method failed to process "\
+                                                 "received_message with #{e.inspect}"
+                                     }, context, correlation_id, event_id))
+            raise e
+          end
 
           elapsed_time_ms = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond) - start
           logger.info(log_context({
@@ -94,14 +105,14 @@ module PipefyMessage
                                               "in #{elapsed_time_ms} milliseconds"
                                   }, context, correlation_id, event_id))
         end
-      rescue PipefyMessage::Providers::Errors::ResourceError => e
+      rescue StandardError => e
         context = "NO_CONTEXT_RETRIEVED" unless defined? context
         correlation_id = "NO_CID_RETRIEVED" unless defined? correlation_id
         event_id = "NO_EVENT_ID_RETRIEVED" unless defined? event_id
         # this shows up in multiple places; OK or DRY up?
 
         logger.error(log_context({
-                                   log_text: "Failed to process message; details: #{e.inspect}"
+                                   log_text: "Queue polling failed with #{e.inspect}"
                                  }, context, correlation_id, event_id))
         raise e
       end
