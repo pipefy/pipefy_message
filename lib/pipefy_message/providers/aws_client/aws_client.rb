@@ -14,7 +14,7 @@ module PipefyMessage
       ##
       # Sets up AWS options the first time an AWS service is used.
       def self.aws_setup
-        logger.info({ message_text: "AWS configurations set" })
+        logger.info({ log_text: "AWS configurations set" })
         Aws.config.update(retrieve_config)
       end
 

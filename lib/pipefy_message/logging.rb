@@ -32,11 +32,11 @@ module PipefyMessage
         logger.level = LOG_LEVELS.index(ENV.fetch("ASYNC_LOG_LEVEL", "INFO")) || Logger::ERROR
 
         logger.formatter = proc do |severity, datetime, progname, msg|
-          { date: datetime.to_s,
+          { time: datetime.to_s,
             level: severity.to_s,
-            app: progname.to_s,
+            program_name: progname.to_s,
             context: "async_processing",
-            message: msg }.to_json + $INPUT_RECORD_SEPARATOR
+            data: msg }.to_json + $INPUT_RECORD_SEPARATOR
         end
       end
     end
