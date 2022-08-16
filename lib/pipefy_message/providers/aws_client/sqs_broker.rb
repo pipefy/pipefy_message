@@ -17,17 +17,12 @@ module PipefyMessage
           AwsClient.aws_setup
 
           @sqs = Aws::SQS::Client.new
-
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
-
           @queue_url = handle_queue_protocol(@sqs.get_queue_url({ queue_name: handle_queue_name(@config[:queue_name]) })
                                                  .queue_url)
-
           @poller = Aws::SQS::QueuePoller.new(@queue_url, { client: @sqs })
 
-          logger.debug(log_queue_info({
-                                        log_text: "SQS client created"
-                                      }))
+          logger.debug(log_queue_info({ log_text: "SQS client created" }))
         rescue Aws::SQS::Errors::QueueDoesNotExist, Aws::SQS::Errors::NonExistentQueue
           logger.error({
                          queue_name: @config[:queue_name],
@@ -39,12 +34,10 @@ module PipefyMessage
                 "The specified AWS SQS queue #{@config[:queue_name]} does not exist"
         rescue StandardError => e
           msg = "Failed to initialize AWS SQS broker with #{e.inspect}"
-
           logger.error({
                          queue_name: @config[:queue_name],
                          log_text: msg
                        })
-
           raise PipefyMessage::Providers::Errors::ResourceError, msg
         end
 
@@ -52,9 +45,7 @@ module PipefyMessage
         # Initiates SQS queue polling, with wait_time_seconds as given
         # in the initial configuration.
         def poller
-          logger.info(log_queue_info({
-                                       log_text: "Initiating SQS polling on queue #{@queue_url}"
-                                     }))
+          logger.info(log_queue_info({ log_text: "Initiating SQS polling on queue #{@queue_url}" }))
 
           @poller.poll({ wait_time_seconds: @config[:wait_time_seconds],
                          message_attribute_names: ["All"], attribute_names: ["All"] }) do |received_message|
@@ -79,7 +70,6 @@ module PipefyMessage
               # This would probably only be the case if a malformed and
               # thus unparseable message is received (eg: in case of
               # breaking changes in SQS)
-
               logger.error(log_queue_info({
                                             received_message: received_message,
                                             log_text: "Consuming received_message failed with #{e.inspect}"
@@ -91,7 +81,6 @@ module PipefyMessage
             end
 
             # error in the routine, skip delete to try the message again later with 30sec of delay
-
             throw e if e.instance_of?(NameError)
 
             throw :skip_delete
