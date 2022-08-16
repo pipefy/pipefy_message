@@ -4,6 +4,7 @@
 require "rubygems"
 require "singleton"
 require "thor"
+require "pipefy_message"
 
 module PipefyMessage
   # CLI
@@ -24,6 +25,8 @@ module PipefyMessage
   # Runner
   class Runner
     include Singleton
+    include PipefyMessage::Logging
+
     def initialize_rails
       # Adapted from: https://github.com/mperham/sidekiq/blob/master/lib/sidekiq/cli.rb
 
@@ -35,6 +38,9 @@ module PipefyMessage
         require File.expand_path("config/application.rb")
         require File.expand_path("config/environment.rb")
       end
+
+      # Override rails logger by gem logger
+      ::Rails.logger = logger
     end
 
     def write_pid(options)
