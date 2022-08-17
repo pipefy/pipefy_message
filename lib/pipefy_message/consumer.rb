@@ -92,7 +92,7 @@ module PipefyMessage
             logger.error(log_context({
                                        received_message: payload,
                                        received_metadata: metadata,
-                                       log_text: "Consumer #{obj.name}.perform method failed to process "\
+                                       log_text: "Consumer #{obj.class.name}.perform method failed to process "\
                                                  "received_message with #{e.inspect}"
                                      }, context, correlation_id, event_id))
             raise e
