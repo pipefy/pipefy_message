@@ -22,7 +22,13 @@ module PipefyMessage
           @topic_arn_prefix = ENV.fetch("AWS_SNS_ARN_PREFIX", "arn:aws:sns:us-east-1:000000000000:")
           @is_staging = ENV["ASYNC_APP_ENV"] == "staging"
         rescue StandardError => e
-          raise PipefyMessage::Providers::Errors::ResourceError, e.message
+          msg = "Failed to initialize AWS SNS broker with #{e.inspect}"
+
+          logger.error({
+                         log_text: msg
+                       })
+
+          raise PipefyMessage::Providers::Errors::ResourceError, msg
         end
 
         ##
@@ -31,13 +37,27 @@ module PipefyMessage
         def publish(payload, topic_name, context, correlation_id, event_id)
           message = prepare_payload(payload)
           topic_arn = @topic_arn_prefix + (@is_staging ? "#{topic_name}-staging" : topic_name)
-          topic = @sns.topic(topic_arn)
+
+          begin
+            topic = @sns.topic(topic_arn)
+          rescue StandardError => e
+            msg = "Resolving AWS SNS topic #{topic_name} failed with #{e.inspect}"
+
+            logger.error({
+                           topic_name: topic_name,
+                           topic_arn: topic_arn,
+                           log_text: msg
+                         })
+
+            raise PipefyMessage::Providers::Errors::ResourceError, msg
+          end
 
           logger.info(log_context(
                         {
+                          topic_name: topic_name,
                           topic_arn: topic_arn,
                           payload: payload,
-                          log_text: "Attempting to publish a json message to topic #{topic_arn}"
+                          log_text: "Attempting to publish message to SNS topic #{topic_name}"
                         },
                         context, correlation_id, event_id
                       ))
@@ -61,9 +81,11 @@ module PipefyMessage
 
           logger.info(log_context(
                         {
+                          topic_name: topic_name,
                           topic_arn: topic_arn,
-                          message_id: result.message_id,
-                          log_text: "Message published"
+                          aws_message_id: result.message_id,
+                          payload: payload,
+                          log_text: "Message published to SNS topic #{topic_name}"
                         },
                         context, correlation_id, event_id
                       ))
@@ -77,12 +99,15 @@ module PipefyMessage
 
           logger.error(log_context(
                          {
+                           topic_name: topic_name,
                            topic_arn: topic_arn,
-                           log_text: "Failed to publish message",
-                           error_details: e.inspect
+                           payload: payload,
+                           log_text: "AWS SNS broker failed to publish to topic #{topic_name} with #{e.inspect}"
                          },
                          context, correlation_id, event_id
                        ))
+
+          raise e
         end
 
         private
