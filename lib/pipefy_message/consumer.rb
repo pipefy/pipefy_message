@@ -104,6 +104,7 @@ module PipefyMessage
                                     log_text: "Message received by consumer poller, processed " \
                                               "in #{elapsed_time_ms} milliseconds"
                                   }, context, correlation_id, event_id))
+          $stdout.flush # Ensure everything is flushed to log after processing a message
         end
       rescue StandardError => e
         context = "NO_CONTEXT_RETRIEVED" unless defined? context
